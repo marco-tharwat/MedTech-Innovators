@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="MediCare.Data/MediCare.Data.csproj" Id="f802b875-dc41-49c9-88a6-0f759d1d5c41" />
+  <Project Path="MediCare.Services/MediCare.Services.csproj" Id="82820158-9cd1-49a2-beae-2eeba4de8679" />
+  <Project Path="MediCare.Web/MediCare.Web.csproj" Id="0b944d08-b8d5-48fb-9049-e92d5ecdd7fa" />
+</Solution>

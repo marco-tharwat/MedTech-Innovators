@@ -1,4 +1,6 @@
+using MediCare.Data.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace MediCare.Web
 {
@@ -13,6 +15,10 @@ namespace MediCare.Web
 
             builder.Services.AddControllersWithViews();
 
+            //register DbContext
+            builder.Services.AddDbContext<MedContext>(
+                options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default"))
+                );
 
             var app = builder.Build();
 

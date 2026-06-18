@@ -13,7 +13,6 @@ namespace MediCare.Web
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
-            builder.Services.AddControllersWithViews();
 
             //register DbContext
             builder.Services.AddDbContext<MedContext>(
@@ -28,14 +27,15 @@ namespace MediCare.Web
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
             app.UseRouting();
 
-
-            app.MapStaticAssets();
+            //app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}")
-                .WithStaticAssets();
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+                //.WithStaticAssets();
 
             app.Run();
         }

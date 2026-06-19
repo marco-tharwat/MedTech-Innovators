@@ -31,6 +31,8 @@ namespace MediCare.Web
             app.UseStaticFiles();
             app.UseRouting();
 
+            app.UseAuthentication();
+            app.UseAuthorization();
             //app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",

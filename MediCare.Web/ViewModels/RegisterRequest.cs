@@ -1,9 +1,12 @@
-﻿namespace MediCare.Web.ViewModels
+﻿using MediCare.Data.Models;
+
+namespace MediCare.Web.ViewModels
 {
     public class RegisterRequest
     {
         public string Name { get; set; } = null!;
-        public bool Male {  get; set; }
-        public bool Female {  get; set; }
+        public Gender Gender { get; set; }
+        public string Role {  get; set; }=null!;
+        public string Password {  get; set; } = null!;
     }
 }

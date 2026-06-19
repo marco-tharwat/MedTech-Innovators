@@ -30,14 +30,7 @@ namespace MediCare.Web.Controllers
                 ModelState.AddModelError("", "the data is not found");
                 return View("Register");
             }
-            var test=await _userManager.FindByEmailAsync(request.Email);
-            if(test is not null)
-            {
-                ModelState.AddModelError("Email", "this email is already exists");
-                request.Email = "";
-                return View("Register",request);
-            }
-            ApplicationUser user = new ApplicationUser { FullName=request.Name,Gender=request.Gender,Email=request.Email,UserName=request.Name+DateTime.Now.ToString("dMyyyy")+ request.Email};
+            ApplicationUser user = new ApplicationUser { FullName=request.Name,Gender=request.Gender,Email=request.Email,UserName=request.UserName};
             var res=await _userManager.CreateAsync(user,request.Password);
             await _userManager.AddToRoleAsync(user, request.Role);
             if (res.Succeeded)
@@ -63,10 +56,10 @@ namespace MediCare.Web.Controllers
             if (ModelState.IsValid)
             {
                 if (request is null) return View("Login");
-                var user = await _userManager.FindByEmailAsync(request.Email);
+                var user = await _userManager.FindByNameAsync(request.UserName);
                 if (user is null)
                 {
-                    ModelState.AddModelError("", "the password or Email is incorrect!!!");
+                    ModelState.AddModelError("", "the password or UserName is incorrect!!!");
                     return View("Login");
                 }
                 var flag = await _userManager.CheckPasswordAsync(user,request.Password);
@@ -76,7 +69,7 @@ namespace MediCare.Web.Controllers
                     return RedirectToAction("Index", "Home");
                 }
             }
-            ModelState.AddModelError("", "the password or Email is incorrect!!!");
+            ModelState.AddModelError("", "the password or UserName is incorrect!!!");
             return View("Login");
         }
 

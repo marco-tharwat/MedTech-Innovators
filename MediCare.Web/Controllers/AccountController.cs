@@ -25,7 +25,11 @@ namespace MediCare.Web.Controllers
         [HttpPost]
         public async Task<ActionResult> Register(RegisterRequest request)
         {
-            if (request == null) return BadRequest("ther is wrong with data!!");
+            if (request == null)
+            {
+                ModelState.AddModelError("", "the data is not found");
+                return View("Register");
+            }
             var test=await _userManager.FindByEmailAsync(request.Email);
             if(test is not null)
             {
@@ -38,13 +42,13 @@ namespace MediCare.Web.Controllers
             await _userManager.AddToRoleAsync(user, request.Role);
             if (res.Succeeded)
             {
-                return Ok("succeeded");
+                return RedirectToAction("Index", "Home");
             }
             foreach (var error in res.Errors)
             {
                 ModelState.AddModelError("", error.Description);
             }
-            return View("Register");
+            return View("Register",request);
         }
 
         [HttpGet]

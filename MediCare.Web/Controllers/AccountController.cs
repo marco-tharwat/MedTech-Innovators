@@ -26,7 +26,14 @@ namespace MediCare.Web.Controllers
         public async Task<ActionResult> Register(RegisterRequest request)
         {
             if (request == null) return BadRequest("ther is wrong with data!!");
-            ApplicationUser user = new ApplicationUser { FullName=request.Name,Gender=request.Gender,UserName=request.Email};
+            var test=await _userManager.FindByEmailAsync(request.Email);
+            if(test is not null)
+            {
+                ModelState.AddModelError("Email", "this email is already exists");
+                request.Email = "";
+                return View("Register",request);
+            }
+            ApplicationUser user = new ApplicationUser { FullName=request.Name,Gender=request.Gender,Email=request.Email,UserName=request.Name+DateTime.Now.ToString("dMyyyy")+ request.Email};
             var res=await _userManager.CreateAsync(user,request.Password);
             await _userManager.AddToRoleAsync(user, request.Role);
             if (res.Succeeded)
@@ -37,7 +44,7 @@ namespace MediCare.Web.Controllers
             {
                 ModelState.AddModelError("", error.Description);
             }
-            return BadRequest();
+            return View("Register");
         }
 
         [HttpGet]
@@ -47,25 +54,26 @@ namespace MediCare.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Login_(LoginRequest request)
+        public async Task<ActionResult> Login(LoginRequest request)
         {
             if (ModelState.IsValid)
             {
-                if (request is null) return BadRequest("ther is wrong with data!!");
-                var user = await _userManager.FindByNameAsync(request.Name);
+                if (request is null) return View("Login");
+                var user = await _userManager.FindByEmailAsync(request.Email);
                 if (user is null)
                 {
-                    ModelState.AddModelError("", "the password or username is incorrect!!!");
+                    ModelState.AddModelError("", "the password or Email is incorrect!!!");
                     return View("Login");
                 }
                 var flag = await _userManager.CheckPasswordAsync(user,request.Password);
                 if (flag) 
                 { 
                     await _signInManager.SignInAsync(user,request.Rememberme);
-                    return RedirectToAction("Index");
+                    return RedirectToAction("Index", "Home");
                 }
             }
-            return BadRequest();
+            ModelState.AddModelError("", "the password or Email is incorrect!!!");
+            return View("Login");
         }
 
         [HttpPost]

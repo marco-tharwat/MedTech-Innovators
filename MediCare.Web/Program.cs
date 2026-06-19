@@ -1,12 +1,14 @@
 using MediCare.Data.Models;
+using MediCare.Web.Controllers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace MediCare.Web
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -17,10 +19,17 @@ namespace MediCare.Web
                 options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default"))
                 );
 
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<MedContext>();
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<MedContext>().AddDefaultTokenProviders();
 
             var app = builder.Build();
 
+            using (var scope = app.Services.CreateScope())
+            {
+                var roleManager = scope.ServiceProvider
+                    .GetRequiredService<RoleManager<IdentityRole>>();
+
+                await AccountController.SeedRoles(roleManager);
+            }
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())

@@ -78,6 +78,9 @@ namespace MediCare.Web.Controllers
 
         public static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
         {
+            if (!await roleManager.RoleExistsAsync("Admin"))
+                await roleManager.CreateAsync(new IdentityRole("Admin"));
+
             if (!await roleManager.RoleExistsAsync("Doctor"))
                 await roleManager.CreateAsync(new IdentityRole("Doctor"));
 

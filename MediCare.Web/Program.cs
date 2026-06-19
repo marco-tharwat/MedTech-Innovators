@@ -13,11 +13,11 @@ namespace MediCare.Web
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
-
-            //register DbContext
             builder.Services.AddDbContext<MedContext>(
                 options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default"))
                 );
+
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<MedContext>();
 
             var app = builder.Build();
 

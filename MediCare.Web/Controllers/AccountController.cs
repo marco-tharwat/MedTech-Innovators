@@ -1,6 +1,5 @@
 ﻿using MediCare.Data.Models;
 using MediCare.Web.ViewModels;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,10 +23,10 @@ namespace MediCare.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Register_(RegisterRequest request)
+        public async Task<ActionResult> Register(RegisterRequest request)
         {
             if (request == null) return BadRequest("ther is wrong with data!!");
-            ApplicationUser user = new ApplicationUser { FullName=request.Name,Gender=request.Gender};
+            ApplicationUser user = new ApplicationUser { FullName=request.Name,Gender=request.Gender,UserName=request.Email};
             var res=await _userManager.CreateAsync(user,request.Password);
             await _userManager.AddToRoleAsync(user, request.Role);
             if (res.Succeeded)

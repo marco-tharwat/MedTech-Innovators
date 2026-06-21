@@ -1,5 +1,4 @@
 ﻿using MediCare.Data.Models;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,10 +7,9 @@ using System.Threading.Tasks;
 
 namespace MediCare.Data.Repositories
 {
-    public class PatientRepository : Repository<Patient>,IPatientRepository
+    public class NotificationRepository : Repository<Notification>, INotificationRepository
     {
-        public PatientRepository(MedContext context):base(context) { }
-        
-
+        public NotificationRepository(MedContext context) : base(context) { }
+       
     }
 }

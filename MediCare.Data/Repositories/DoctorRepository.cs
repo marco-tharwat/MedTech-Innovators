@@ -1,5 +1,5 @@
-﻿using MediCare.Data.IRepositories;
-using MediCare.Data.Models;
+﻿using MediCare.Data.Models;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,27 +9,21 @@ using System.Threading.Tasks;
 
 namespace MediCare.Data.Repositories
 {
-    internal class DoctorRepository : IRepository<Doctor>
+    public class DoctorRepository : Repository<Doctor>,IDoctorRepository
     {
         private readonly MedContext context;
 
-        public DoctorRepository(MedContext context)
+        public DoctorRepository(MedContext context):base(context)
         {
             this.context = context;
         }
-        public void Create(Doctor instance) => context.Doctors.Add(instance);
 
-
-        public void Delete(Doctor instance) => context.Doctors.Remove(instance);
-
-        public List<Doctor> GetAll() => context.Doctors.ToList();
-
-        public Doctor GetById(int id) => context.Doctors.Find(id);
-
-        public Doctor GetByName(string name)
-            => context.Doctors.Include(d => d.User)
-            .FirstOrDefault(d => d.User.UserName == name);
-
-        public void Update(Doctor instance) => context.Doctors.Update(instance);
+        public async Task<Doctor?> GetProfileForBookingAsync(int id)
+        {
+            return await context.Doctors
+                .Include(d => d.User)
+                .Include(d => d.Specialization)
+                .Include(d => d.WorkingHours).FirstOrDefaultAsync(d => d.Id == id);
+        }
     }
 }

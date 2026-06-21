@@ -8,10 +8,9 @@ using System.Threading.Tasks;
 
 namespace MediCare.Data.Repositories
 {
-    public class PatientRepository : Repository<Patient>,IPatientRepository
+    public interface IDoctorRepository : IRepository<Doctor>
     {
-        public PatientRepository(MedContext context):base(context) { }
-        
-
+        Task<Doctor?> GetProfileForBookingAsync(int id);
+       
     }
 }

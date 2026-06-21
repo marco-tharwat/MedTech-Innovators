@@ -1,4 +1,5 @@
 using MediCare.Data.Models;
+using MediCare.Data.Repositories;
 using MediCare.Web.Controllers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,11 @@ namespace MediCare.Web
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<MedContext>().AddDefaultTokenProviders();
 
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
+            builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+            builder.Services.AddScoped<IMedicalRecordRepository, MedicalRecordRepository>();
+            builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
             var app = builder.Build();
 
             using (var scope = app.Services.CreateScope())

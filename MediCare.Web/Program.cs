@@ -1,8 +1,8 @@
 using MediCare.Data.Models;
+using MediCare.Services;
 using MediCare.Web.Controllers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace MediCare.Web
 {
@@ -21,6 +21,8 @@ namespace MediCare.Web
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<MedContext>().AddDefaultTokenProviders();
 
+            builder.Services.AddScoped<WorkingHoursService>();
+            builder.Services.AddScoped<AppointmentService>();
             var app = builder.Build();
 
             using (var scope = app.Services.CreateScope())
@@ -46,7 +48,7 @@ namespace MediCare.Web
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
-                //.WithStaticAssets();
+            //.WithStaticAssets();
 
             app.Run();
         }

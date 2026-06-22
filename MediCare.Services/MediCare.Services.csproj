@@ -20,4 +20,9 @@
     <ProjectReference Include="..\MediCare.Data\MediCare.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DTOs\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+
 </Project>

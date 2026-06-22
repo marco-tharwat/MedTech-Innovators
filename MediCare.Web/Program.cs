@@ -1,5 +1,6 @@
 using MediCare.Data.Models;
 using MediCare.Services;
+using MediCare.Data.Repositories;
 using MediCare.Web.Controllers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -21,8 +22,6 @@ namespace MediCare.Web
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<MedContext>().AddDefaultTokenProviders();
 
-            builder.Services.AddScoped<WorkingHoursService>();
-            builder.Services.AddScoped<AppointmentService>();
             var app = builder.Build();
 
             using (var scope = app.Services.CreateScope())

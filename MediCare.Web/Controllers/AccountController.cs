@@ -73,7 +73,7 @@ namespace MediCare.Web.Controllers
             return View("Login");
         }
 
-        [HttpGet]
+        [HttpPost]
         public async Task<ActionResult> Logout()
         {
             await _signInManager.SignOutAsync();

@@ -1,10 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using MediCare.Data.Models;
 
 namespace MediCare.Data.Repositories.Interfaces
 {
-    internal class IMedicalRecordRepository
+    public interface IMedicalRecordRepository : IRepository<MedicalRecord>
     {
+        Task<IEnumerable<MedicalRecord>> GetRecordsByPatientAsync(int patientId);
+        Task<IEnumerable<MedicalRecord>> GetRecordsByDoctorAsync(int doctorId);
+        Task<MedicalRecord?> GetRecordWithDocumentsAsync(int recordId);
+        Task<MedicalRecord?> GetRecordWithMedicationsAsync(int recordId);
     }
 }

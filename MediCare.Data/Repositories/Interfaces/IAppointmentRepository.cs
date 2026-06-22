@@ -1,10 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using MediCare.Data.Models;
 
 namespace MediCare.Data.Repositories.Interfaces
 {
-    internal class IAppointmentRepository
+    public interface IAppointmentRepository : IRepository<Appointment>
     {
+        Task<IEnumerable<Appointment>> GetAppointmentsByDoctorAsync(int doctorId);
+        Task<IEnumerable<Appointment>> GetAppointmentsByPatientAsync(int patientId);
+        Task<IEnumerable<Appointment>> GetAppointmentsByDateAsync(DateTime date);
+        Task<IEnumerable<Appointment>> GetUpcomingAppointmentsAsync(int patientId);
+        Task<bool> IsTimeSlotAvailableAsync(int doctorId, DateTime appointmentDate);
     }
 }

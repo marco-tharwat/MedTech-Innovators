@@ -1,43 +1,34 @@
-using MediCare.Data.Models;
-using Microsoft.AspNetCore.Identity;
+﻿using MediCare.Data.Models;
+using MediCare.Data.Repositories.Implementations;
+using MediCare.Data.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace MediCare.Web
-{
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews();
 
-            builder.Services.AddControllersWithViews();
+// Database
+builder.Services.AddDbContext<MedContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            //register DbContext
-            builder.Services.AddDbContext<MedContext>(
-                options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default"))
-                );
+// Repositories
+builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
+builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+builder.Services.AddScoped<IMedicalRecordRepository, MedicalRecordRepository>();
 
-            var app = builder.Build();
+// Unit of Work
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Home/Error");
-            }
-            app.UseRouting();
+// باقي الـ middleware زي ما هو
+app.UseStaticFiles();
+app.UseRouting();
+app.UseAuthorization();
 
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
-            app.MapStaticAssets();
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}")
-                .WithStaticAssets();
-
-            app.Run();
-        }
-    }
-}
+app.Run();

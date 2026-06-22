@@ -1,10 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MediCare.Data.Repositories.Interfaces
+﻿namespace MediCare.Data.Repositories.Interfaces
 {
-    internal class IUnitOfWork
+    public interface IUnitOfWork : IDisposable
     {
+        IDoctorRepository Doctors { get; }
+        IPatientRepository Patients { get; }
+        IAppointmentRepository Appointments { get; }
+        IMedicalRecordRepository MedicalRecords { get; }
+
+        // generic repository 
+        IRepository<T> Repository<T>() where T : class;
+
+        // Save
+        Task<int> SaveChangesAsync();
+        Task BeginTransactionAsync();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
     }
 }

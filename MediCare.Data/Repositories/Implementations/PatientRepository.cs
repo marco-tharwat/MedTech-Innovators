@@ -25,10 +25,10 @@ namespace MediCare.Data.Repositories.Implementations
         }
 
         // search by name 
-        public async Task<IEnumerable<Patient>> SearchPatientsByNameAsync(string name)
+        public async Task<IEnumerable<Patient>> SearchPatientsByIdAsync(int id)
         {
             return await _context.Patients
-                .Where(p => p.Name.Contains(name))
+                .Where(p => p.Id == id)
                 .ToListAsync();
         }
 

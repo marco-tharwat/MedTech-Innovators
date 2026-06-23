@@ -6,7 +6,6 @@ namespace MediCare.Data.Repositories.Interfaces
     {
         Task<Patient?> GetPatientWithMedicalRecordsAsync(int patientId);
         Task<Patient?> GetPatientWithAppointmentsAsync(int patientId);
-        Task<IEnumerable<Patient>> SearchPatientsByNameAsync(string name);
         Task<Patient?> GetPatientByUserIdAsync(string userId);
     }
 }

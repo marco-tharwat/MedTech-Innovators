@@ -39,5 +39,11 @@ namespace MediCare.Data.Repositories.Implementations
                 .Include(d => d.Appointments)
                 .FirstOrDefaultAsync(d => d.Id == doctorId);
         }
+        public async Task<IEnumerable<Doctor>> GetAvailableDoctorsAsync(DateTime date)
+        {
+            return await _context.Doctors
+                .Include(d => d.Appointments)
+                .ToListAsync();
+        }
     }
 }

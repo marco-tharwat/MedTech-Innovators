@@ -23,8 +23,25 @@ namespace MediCare.Data.Repositories.Implementations
                 .Include(p => p.Appointments)
                 .FirstOrDefaultAsync(p => p.Id == patientId);
         }
-
         // search by name 
+
+        public async Task<IEnumerable<Patient>> SearchPatientsByNameAsync(string fullName)
+        {
+            if (string.IsNullOrWhiteSpace(fullName))
+                return Enumerable.Empty<Patient>();
+
+            fullName = fullName.Trim().ToLower();
+
+            return await _context.Patients
+                .Include(p => p.User)
+                .Where(p => p.User != null &&
+                            p.User.FullName != null &&
+                            p.User.FullName.ToLower().Contains(fullName))
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        // search by Id 
         public async Task<IEnumerable<Patient>> SearchPatientsByIdAsync(int id)
         {
             return await _context.Patients

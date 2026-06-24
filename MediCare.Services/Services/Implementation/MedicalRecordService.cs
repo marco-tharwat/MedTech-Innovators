@@ -16,6 +16,12 @@ namespace MediCare.Services.Services.Implementation
         public async Task<bool> CreateMedicalRecordAsync(MedicalRecord record)
         {
             if (record == null || record.PatientId <= 0 || record.DoctorId <= 0) return false;
+
+            var patientExists = await _unitOfWork.Patients.ExistsAsync(p => p.Id == record.PatientId);
+            var doctorExists = await _unitOfWork.Doctors.ExistsAsync(d => d.Id == record.DoctorId);
+
+            if (!patientExists || !doctorExists) return false;
+
             try
             {
                 await _unitOfWork.MedicalRecords.AddAsync(record);

@@ -7,24 +7,28 @@ namespace MediCare.Services.Services.Implementation
     public class PrescriptionService : IPrescriptionService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IRepository<Medication> _medicationRepo;
 
         public PrescriptionService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
+            _medicationRepo = unitOfWork.Repository<Medication>();
         }
         public async Task<bool> AddMedicationsToRecordAsync(int medicalRecordId, IEnumerable<Medication> medications)
         {
             if (medicalRecordId <= 0 || medications == null || !medications.Any()) return false;
+
+            var recordExists = await _unitOfWork.MedicalRecords.ExistsAsync(m => m.Id == medicalRecordId);
+            if (!recordExists) return false;
+
             try
             {
-                var medicationsRepo = GetRepo();
 
                 foreach (var med in medications)
                 {
                     med.MedicalRecordId = medicalRecordId;
-                    await medicationsRepo.AddAsync(med);
                 }
-
+                await _medicationRepo.AddRangeAsync(medications);
                 var rowsChanged = await _unitOfWork.SaveChangesAsync();
                 return rowsChanged > 0;
             }
@@ -39,12 +43,11 @@ namespace MediCare.Services.Services.Implementation
             if (medicationId <= 0) return false;
             try
             {
-                var medicationsRepo = GetRepo();
-                var medication = await medicationsRepo.GetByIdAsync(medicationId);
+                var medication = await _medicationRepo.GetByIdAsync(medicationId);
 
                 if (medication == null) return false;
 
-                medicationsRepo.Remove(medication);
+                _medicationRepo.Remove(medication);
                 var rowsChanged = await _unitOfWork.SaveChangesAsync();
                 return rowsChanged > 0;
             }
@@ -53,10 +56,6 @@ namespace MediCare.Services.Services.Implementation
 
                 return false;
             }
-        }
-        private IRepository<Medication> GetRepo()
-        {
-            return _unitOfWork.Repository<Medication>();
         }
     }
 }

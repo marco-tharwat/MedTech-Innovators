@@ -7,19 +7,19 @@ namespace MediCare.Services.Services.Implementation
 {
     public class MedicalRecordService : IMedicalRecordService
     {
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
         public MedicalRecordService(IUnitOfWork unitOfWork)
         {
-            this.unitOfWork = unitOfWork;
+            _unitOfWork = unitOfWork;
         }
         public async Task<bool> CreateMedicalRecordAsync(MedicalRecord record)
         {
             if (record == null || record.PatientId <= 0 || record.DoctorId <= 0) return false;
             try
             {
-                await unitOfWork.MedicalRecords.AddAsync(record);
-                var rowsChanged = await unitOfWork.SaveChangesAsync();
+                await _unitOfWork.MedicalRecords.AddAsync(record);
+                var rowsChanged = await _unitOfWork.SaveChangesAsync();
 
                 return rowsChanged > 0;
             }
@@ -32,18 +32,18 @@ namespace MediCare.Services.Services.Implementation
 
         public async Task<IEnumerable<MedicalRecord>> GetPatientHistoryAsync(int patientId)
         {
-            return await unitOfWork.MedicalRecords.GetRecordsByPatientAsync(patientId);
+            return await _unitOfWork.MedicalRecords.GetRecordsByPatientAsync(patientId);
         }
 
         public async Task<MedicalRecord?> GetRecordDetailsAsync(int recordId)
         {
-            var query = unitOfWork.MedicalRecords.Query();
+            var query = _unitOfWork.MedicalRecords.Query();
 
-            var result = query.Include(r => r.Medications).
+            var result = await query.Include(r => r.Medications).
                 Include(r => r.MedicalDocuments).
                 Include(r => r.Patient).
                 Include(r => r.Doctor).
-                FirstOrDefault(r => r.Id == recordId);
+                FirstOrDefaultAsync(r => r.Id == recordId);
 
             return result;
         }

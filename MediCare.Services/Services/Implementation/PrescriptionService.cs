@@ -6,18 +6,18 @@ namespace MediCare.Services.Services.Implementation
 {
     public class PrescriptionService : IPrescriptionService
     {
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
         public PrescriptionService(IUnitOfWork unitOfWork)
         {
-            this.unitOfWork = unitOfWork;
+            _unitOfWork = unitOfWork;
         }
         public async Task<bool> AddMedicationsToRecordAsync(int medicalRecordId, IEnumerable<Medication> medications)
         {
             if (medicalRecordId <= 0 || medications == null || !medications.Any()) return false;
             try
             {
-                var medicationsRepo = unitOfWork.Repository<Medication>();
+                var medicationsRepo = GetRepo();
 
                 foreach (var med in medications)
                 {
@@ -25,7 +25,7 @@ namespace MediCare.Services.Services.Implementation
                     await medicationsRepo.AddAsync(med);
                 }
 
-                var rowsChanged = await unitOfWork.SaveChangesAsync();
+                var rowsChanged = await _unitOfWork.SaveChangesAsync();
                 return rowsChanged > 0;
             }
             catch (Exception)
@@ -36,7 +36,27 @@ namespace MediCare.Services.Services.Implementation
 
         public async Task<bool> RemoveMedicationAsync(int medicationId)
         {
-            throw new NotImplementedException();
+            if (medicationId <= 0) return false;
+            try
+            {
+                var medicationsRepo = GetRepo();
+                var medication = await medicationsRepo.GetByIdAsync(medicationId);
+
+                if (medication == null) return false;
+
+                medicationsRepo.Remove(medication);
+                var rowsChanged = await _unitOfWork.SaveChangesAsync();
+                return rowsChanged > 0;
+            }
+            catch (Exception)
+            {
+
+                return false;
+            }
+        }
+        private IRepository<Medication> GetRepo()
+        {
+            return _unitOfWork.Repository<Medication>();
         }
     }
 }

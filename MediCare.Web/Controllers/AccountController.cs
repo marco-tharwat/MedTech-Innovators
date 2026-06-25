@@ -9,11 +9,16 @@ namespace MediCare.Web.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public AccountController(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
         }
 
         [HttpGet]
@@ -27,21 +32,46 @@ namespace MediCare.Web.Controllers
         {
             if (request == null)
             {
-                ModelState.AddModelError("", "the data is not found");
+                ModelState.AddModelError("", "The data is not found");
                 return View("Register");
             }
-            ApplicationUser user = new ApplicationUser { FullName=request.Name,Gender=request.Gender,Email=request.Email,UserName=request.UserName};
-            var res=await _userManager.CreateAsync(user,request.Password);
-            await _userManager.AddToRoleAsync(user, request.Role);
+
+            if (!ModelState.IsValid)
+            {
+                return View("Register", request);
+            }
+
+            ApplicationUser user = new ApplicationUser
+            {
+                FullName = request.Name,
+                Gender = request.Gender,
+                Email = request.Email,
+                UserName = request.UserName
+            };
+
+            // 1️⃣ Create User
+            var res = await _userManager.CreateAsync(user, request.Password);
+
+            // 2️⃣ لو نجح بس
             if (res.Succeeded)
             {
+                // 3️⃣ تأكد إن الرول موجود
+                if (!string.IsNullOrEmpty(request.Role) &&
+                    await _roleManager.RoleExistsAsync(request.Role))
+                {
+                    await _userManager.AddToRoleAsync(user, request.Role);
+                }
+
                 return RedirectToAction("Index", "Home");
             }
+
+            // 4️⃣ لو فشل اطبع الأخطاء
             foreach (var error in res.Errors)
             {
                 ModelState.AddModelError("", error.Description);
             }
-            return View("Register",request);
+
+            return View("Register", request);
         }
 
         [HttpGet]
@@ -53,33 +83,37 @@ namespace MediCare.Web.Controllers
         [HttpPost]
         public async Task<ActionResult> Login(LoginRequest request)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return View("Login");
+
+            var user = await _userManager.FindByNameAsync(request.UserName);
+
+            if (user == null)
             {
-                if (request is null) return View("Login");
-                var user = await _userManager.FindByNameAsync(request.UserName);
-                if (user is null)
-                {
-                    ModelState.AddModelError("", "the password or UserName is incorrect!!!");
-                    return View("Login");
-                }
-                var flag = await _userManager.CheckPasswordAsync(user,request.Password);
-                if (flag) 
-                { 
-                    await _signInManager.SignInAsync(user,request.Rememberme);
-                    return RedirectToAction("Index", "Home");
-                }
+                ModelState.AddModelError("", "Username or password is incorrect");
+                return View("Login");
             }
-            ModelState.AddModelError("", "the password or UserName is incorrect!!!");
+
+            var flag = await _userManager.CheckPasswordAsync(user, request.Password);
+
+            if (flag)
+            {
+                await _signInManager.SignInAsync(user, request.Rememberme);
+                return RedirectToAction("Index", "Home");
+            }
+
+            ModelState.AddModelError("", "Username or password is incorrect");
             return View("Login");
         }
 
-        [HttpPost]
+        [HttpGet]
         public async Task<ActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
             return RedirectToAction("Login");
         }
 
+        // Seeder لل Roles
         public static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
         {
             if (!await roleManager.RoleExistsAsync("Admin"))

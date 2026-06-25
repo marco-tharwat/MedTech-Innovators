@@ -11,7 +11,7 @@ builder.Services.AddControllersWithViews();
 
 // Database
 builder.Services.AddDbContext<MedContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
 // Repositories
 builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();

@@ -8,7 +8,7 @@ namespace MediCare.Data.Repositories.Implementations
     {
         public PatientRepository(MedContext context) : base(context) { }
 
-        
+
         public async Task<Patient?> GetPatientWithMedicalRecordsAsync(int patientId)
         {
             return await _context.Patients
@@ -16,7 +16,7 @@ namespace MediCare.Data.Repositories.Implementations
                 .FirstOrDefaultAsync(p => p.Id == patientId);
         }
 
-        
+
         public async Task<Patient?> GetPatientWithAppointmentsAsync(int patientId)
         {
             return await _context.Patients
@@ -54,6 +54,12 @@ namespace MediCare.Data.Repositories.Implementations
         {
             return await _context.Patients
                 .FirstOrDefaultAsync(p => p.UserId == userId);
+        }
+        public async Task<IEnumerable<Patient>> GetAllWithUsersAsync()
+        {
+            return await _context.Patients
+                .Include(p => p.User)
+                .ToListAsync();
         }
     }
 }

@@ -35,14 +35,76 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 
 var app = builder.Build();
 
-// Seed Roles
+// COPILOT: START temporary test seeding - remove before commit
+// Seed Roles and sample users/profiles for testing
+/////////////
 using (var scope = app.Services.CreateScope())
 {
-    var roleManager = scope.ServiceProvider
-        .GetRequiredService<RoleManager<IdentityRole>>();
+    //////////////////////
+    var services = scope.ServiceProvider;
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+    var context = services.GetRequiredService<MedContext>();
 
+    // ///////////  Seed roles (Admin, Doctor, Patient)
     await AccountController.SeedRoles(roleManager);
+
+    //////////// Ensure a specialization exists for the sample doctor
+    if (!await context.Specializations.AnyAsync())
+    {
+        context.Specializations.Add(new Specialization { Name = "General" });
+        await context.SaveChangesAsync();
+    }
+
+    ///////////// Create a sample doctor user + domain profile if not exists
+    if (await userManager.FindByNameAsync("drsmith") == null)
+    {
+        var doctorUser = new ApplicationUser
+        {
+            UserName = "drsmith",
+            Email = "dr.smith@example.com",
+            FullName = "Dr John Smith",
+            Gender = Gender.Male
+        };
+        await userManager.CreateAsync(doctorUser, "Password123!");
+        await userManager.AddToRoleAsync(doctorUser, "Doctor");
+
+        // create doctor profile and mark approved so UI is usable in tests
+        var spec = await context.Specializations.FirstAsync();
+        var doctor = new Doctor
+        {
+            UserId = doctorUser.Id,
+            ConsultationFee = 50m,
+            IsApproved = true,
+            SpecializationId = spec.Id
+        };
+        context.Doctors.Add(doctor);
+        await context.SaveChangesAsync();
+    }
+
+    // Create a sample patient user + domain profile if not exists
+    if (await userManager.FindByNameAsync("patient1") == null)
+    {
+        var patientUser = new ApplicationUser
+        {
+            UserName = "patient1",
+            Email = "patient1@example.com",
+            FullName = "Jane Patient",
+            Gender = Gender.Female
+        };
+        await userManager.CreateAsync(patientUser, "Password123!");
+        await userManager.AddToRoleAsync(patientUser, "Patient");
+
+        var patient = new Patient
+        {
+            UserId = patientUser.Id,
+            BirthDate = DateTime.Today.AddYears(-30)
+        };
+        context.Patients.Add(patient);
+        await context.SaveChangesAsync();
+    }
 }
+// COPILOT: END temporary test seeding - remove before commit
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

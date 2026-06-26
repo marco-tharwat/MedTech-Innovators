@@ -38,17 +38,28 @@ namespace MediCare.Services.Services.Implementation
 
         public async Task<IEnumerable<MedicalRecord>> GetPatientHistoryAsync(int patientId)
         {
+            if (patientId <= 0) return null;
+
+            var patientExists = await _unitOfWork.Patients.ExistsAsync(p => p.Id == patientId);
+            if (!patientExists) return null;
+
             return await _unitOfWork.MedicalRecords.GetRecordsByPatientAsync(patientId);
         }
 
         public async Task<MedicalRecord?> GetRecordDetailsAsync(int recordId)
         {
+            if (recordId <= 0) return null;
+
+            var recordExists = await _unitOfWork.MedicalRecords.ExistsAsync(r => r.Id == recordId);
+            if (!recordExists) return null;
+
             var query = _unitOfWork.MedicalRecords.Query();
 
             var result = await query.Include(r => r.Medications).
                 Include(r => r.MedicalDocuments).
-                Include(r => r.Patient).
-                Include(r => r.Doctor).
+                Include(r => r.Patient).ThenInclude(p => p.User).
+                Include(r => r.Doctor).ThenInclude(d => d.User).
+                Include(r => r.Doctor).ThenInclude(d => d.Specialization).
                 FirstOrDefaultAsync(r => r.Id == recordId);
 
             return result;

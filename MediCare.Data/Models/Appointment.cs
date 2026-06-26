@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MediCare.Data.Models.Enum;
+using System.ComponentModel.DataAnnotations;
 
 namespace MediCare.Data.Models
 {

@@ -1,4 +1,4 @@
-﻿using MediCare.Data.Models;
+﻿using MediCare.Data.Models.Enum;
 
 namespace MediCare.Web.ViewModels
 {

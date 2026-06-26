@@ -1,5 +1,57 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    Layout = "_AdminLayout";
 }
+@using MediCare.Data.Models
+@using MediCare.Data.Models.Enum
+@model IEnumerable<Appointment>
+
+@{
+    ViewData["Title"] = "All Appointments";
+}
+
+<h2>All Appointments</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Doctor</th>
+            <th>Patient</th>
+            <th>Notes</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var appt in Model)
+        {
+            <tr>
+                <td>@appt.Id</td>
+                <td>@appt.AppointmentDate.ToString("g")</td>
+                <td>
+                    <span class="badge bg-@(appt.Status switch {
+                        Status.Pending => "warning",
+                        Status.Confirmed => "success",
+                        Status.Completed => "info",
+                        Status.Cancelled => "danger",
+                        _ => "secondary"
+                    })">@appt.Status</span>
+                </td>
+                <td>@appt.Doctor?.User?.FullName</td>
+                <td>@appt.Patient?.User?.FullName</td>
+                <td>@(appt.Notes ?? "-")</td>
+                <td>
+                    <form asp-action="UpdateAppointmentStatus" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@appt.Id" />
+                        <button type="submit" name="status" value="confirmed" class="btn btn-sm btn-success">Confirm</button>
+                        <button type="submit" name="status" value="completed" class="btn btn-sm btn-info">Complete</button>
+                        <button type="submit" name="status" value="cancelled" class="btn btn-sm btn-danger">Cancel</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Dashboard" class="btn btn-secondary">Back</a>

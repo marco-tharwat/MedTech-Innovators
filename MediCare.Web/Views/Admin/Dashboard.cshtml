@@ -1,5 +1,44 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    Layout = "_AdminLayout";
 }
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<h2>Admin Dashboard</h2>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Doctors</h5>
+                <a asp-action="ManageDoctors" class="btn btn-light btn-sm">Manage</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Patients</h5>
+                <a asp-action="ManagePatients" class="btn btn-light btn-sm">Manage</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Appointments</h5>
+                <a asp-action="AllAppointments" class="btn btn-light btn-sm">View All</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Specializations</h5>
+                <a asp-action="Specializations_" class="btn btn-light btn-sm">Manage</a>
+            </div>
+        </div>
+    </div>
+</div>

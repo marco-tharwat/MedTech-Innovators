@@ -1,24 +1,33 @@
 ﻿using MediCare.Data.Models;
+using MediCare.Data.Repositories.Interfaces;
 using MediCare.Web.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MediCare.Web.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        readonly UserManager<ApplicationUser> _userManager;
+        readonly SignInManager<ApplicationUser> _signInManager;
+        readonly IUnitOfWork _unitOfWork;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public AccountController(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager
+            , IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
-        public ActionResult Register()
+        public async Task<ActionResult> Register()
         {
+            var specs = await _unitOfWork.Repository<Specialization>().GetAllAsync();
+            ViewBag.Specializations = new SelectList(specs, "Id", "Name");
             return View("Register");
         }
 
@@ -28,20 +37,45 @@ namespace MediCare.Web.Controllers
             if (request == null)
             {
                 ModelState.AddModelError("", "the data is not found");
-                return View("Register");
+                return RedirectToAction("Register");
             }
-            ApplicationUser user = new ApplicationUser { FullName=request.Name,Gender=request.Gender,Email=request.Email,UserName=request.UserName};
-            var res=await _userManager.CreateAsync(user,request.Password);
+
+            ApplicationUser user = new ApplicationUser
+            { FullName = request.Name, Gender = request.Gender, Email = request.Email, UserName = request.UserName };
+
+            var res = await _userManager.CreateAsync(user, request.Password);
+
             await _userManager.AddToRoleAsync(user, request.Role);
+
             if (res.Succeeded)
             {
-                return RedirectToAction("Index", "Home");
+                if (request.Role == "Doctor")
+                {
+                    Doctor doctor = new();
+                    doctor.User = user;
+                    doctor.UserId = user.Id;
+                    doctor.IsApproved = false;
+                    doctor.SpecializationId=request.SpecializationId ?? 0;
+                    await _unitOfWork.Doctors.AddAsync(doctor);
+                }
+                else
+                {
+                    Patient patient = new Patient();
+                    patient.User = user;
+                    patient.UserId = user.Id;
+                    await _unitOfWork.Patients.AddAsync(patient);
+                }
+                await _unitOfWork.SaveChangesAsync();
+                return RedirectToAction("Login");
             }
+
             foreach (var error in res.Errors)
             {
                 ModelState.AddModelError("", error.Description);
             }
-            return View("Register",request);
+            var specs = await _unitOfWork.Repository<Specialization>().GetAllAsync();
+            ViewBag.Specializations = new SelectList(specs, "Id", "Name");
+            return View("Register", request);
         }
 
         [HttpGet]
@@ -59,13 +93,13 @@ namespace MediCare.Web.Controllers
                 var user = await _userManager.FindByNameAsync(request.UserName);
                 if (user is null)
                 {
-                    ModelState.AddModelError("", "the password or UserName is incorrect!!!");
+                    ModelState.AddModelError("", "UserName is incorrect!");
                     return View("Login");
                 }
-                var flag = await _userManager.CheckPasswordAsync(user,request.Password);
-                if (flag) 
-                { 
-                    await _signInManager.SignInAsync(user,request.Rememberme);
+                var flag = await _userManager.CheckPasswordAsync(user, request.Password);
+                if (flag)
+                {
+                    await _signInManager.SignInAsync(user, request.Rememberme);
                     return RedirectToAction("Index", "Home");
                 }
             }
@@ -73,7 +107,7 @@ namespace MediCare.Web.Controllers
             return View("Login");
         }
 
-        [HttpPost]
+        [HttpGet]
         public async Task<ActionResult> Logout()
         {
             await _signInManager.SignOutAsync();

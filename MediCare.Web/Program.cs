@@ -2,7 +2,9 @@ using MediCare.Data.Models;
 using MediCare.Data.Repositories.Implementations;
 using MediCare.Data.Repositories.Interfaces;
 using MediCare.Services.Interfaces;
+using MediCare.Services.Services;
 using MediCare.Services.Services.Implementation;
+using MediCare.Services.Services.Interfaces;
 using MediCare.Web.Controllers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +15,7 @@ builder.Services.AddControllersWithViews();
 
 // Database
 builder.Services.AddDbContext<MedContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
 // Repositories
 builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
@@ -24,6 +26,7 @@ builder.Services.AddScoped<IMedicalRecordRepository, MedicalRecordRepository>();
 //Services
 builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
 builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();
+builder.Services.AddScoped<IAdminServices, AdminServices>();
 
 // Unit of Work
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();

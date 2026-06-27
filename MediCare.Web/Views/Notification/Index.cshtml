@@ -30,4 +30,11 @@ else
     </div>
 }
 
-<a asp-controller="Home" asp-action="Index" class="btn btn-secondary mt-3">Back</a>
+@if (ViewBag.Role == "admin")
+{
+    <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-secondary mt-3">Back</a>
+}
+else
+{
+    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary mt-3">Back</a>
+}

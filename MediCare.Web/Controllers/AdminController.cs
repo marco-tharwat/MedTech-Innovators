@@ -1,9 +1,7 @@
 ﻿using MediCare.Data.Models;
-using MediCare.Data.Models.Enum;
 using MediCare.Data.Repositories.Interfaces;
 using MediCare.Services.DTO;
 using MediCare.Services.Services.Interfaces;
-using MediCare.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -41,11 +39,37 @@ namespace MediCare.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ManagePatients()
+        public async Task<ActionResult> ManagePatients()
         {
             var data = await _adminServices.FetchPatientsData();
             return View("ManagePatients", data);
         }
+
+        [HttpGet]
+        public async Task<ActionResult> UpdatePatients(int id)
+        {
+            var data=await _adminServices.FetchPatientData(id);
+            var model = new UpdatePatientsRequest
+            {
+                id = id,
+                Name=data.User.FullName,
+                BirthDate=data.BirthDate,
+                BloodType=data.BloodType,
+                EmergencyContact=data.EmergencyContact,
+                Allergies=data.Allergies,
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> UpdatePatients(UpdatePatientsRequest request)
+        {
+            var flag=await _adminServices.UpdatePatients(request);
+            if (flag) return RedirectToAction("Dashboard");
+            else return RedirectToAction("UpdatePatients");
+        }
+
         [HttpGet]
         public async Task<IActionResult> AllAppointments(string status,string order,string date,int PageNum)
         {
@@ -54,6 +78,7 @@ namespace MediCare.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> UpdateAppointmentStatus(string status, int id)
         {
             var flag = await _adminServices.UpdateAppointmentStatus(status, id);
@@ -78,6 +103,7 @@ namespace MediCare.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> DeleteDoctor(int id, int specID)
         {
             var flag = await _adminServices.DeleteDoctor(id);
@@ -95,6 +121,7 @@ namespace MediCare.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> UpdateDoctor(UpdateDoctorRequest doctorRequest, int specID, int id)
         {
             if (!ModelState.IsValid) return View(doctorRequest);

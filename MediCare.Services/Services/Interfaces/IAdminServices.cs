@@ -29,12 +29,14 @@ namespace MediCare.Services.Services.Interfaces
         Task<IEnumerable<Doctor>> FetchDoctorsData();
 
         Task<IEnumerable<Patient>> FetchPatientsData();
-        
+        Task<Patient> FetchPatientData(int id);
+
         Task<IEnumerable<Appointment>> FetchAppointmentsData();
 
         Task<IEnumerable<RegisteredAccountsData>> SetRegisteredAccountsData();
 
         Task<AppointmentsDTO> SetTheAppointments(string status, string order, string date, int PageNum);
+        Task<bool> UpdatePatients(UpdatePatientsRequest request);
 
     }
 }

@@ -189,6 +189,12 @@ namespace MediCare.Services.Services
             return data;
         }
 
+        public async Task<Patient> FetchPatientData(int id)
+        {
+            var data = await _unitOfWork.Patients.Query().Include(_ => _.User).FirstAsync(_=>_.Id==id);
+            return data;
+        }
+
         public async Task<IEnumerable<Appointment>> FetchAppointmentsData()
         {
             return _unitOfWork.Appointments
@@ -275,6 +281,22 @@ namespace MediCare.Services.Services
                 CurrentPage = PageNum,
                 Order = order ?? "ASC"
             };
+        }
+
+        public async Task<bool> UpdatePatients(UpdatePatientsRequest request)
+        {
+            int id = request.id;
+            var data=await FetchPatientData(id);
+            if(data is null)return false;
+            if (data.User != null)
+                data.User.FullName = request.Name;
+            data.BirthDate = request.BirthDate;
+            data.BloodType = request.BloodType;
+            data.EmergencyContact = request.EmergencyContact;
+            data.Allergies = request.Allergies;
+            _unitOfWork.Patients.Update(data);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
         }
     }
 }

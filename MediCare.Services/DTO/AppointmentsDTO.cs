@@ -1,7 +1,5 @@
 ﻿using MediCare.Data.Models;
-
-namespace MediCare.Services.DTO
-{
+namespace MediCare.Services.DTO;
     public class AppointmentsDTO
     {
         public List<Appointment> Appointments { get; set; } = new();
@@ -12,4 +10,3 @@ namespace MediCare.Services.DTO
         public string? Date { get; set; }
         public string? Order { get; set; }
     }
-}

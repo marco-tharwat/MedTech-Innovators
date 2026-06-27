@@ -1,0 +1,46 @@
+﻿@using MediCare.Services.DTO
+@model UpdatePatientsRequest
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Update Patient";
+}
+
+<h2>Update Patient</h2>
+
+<form asp-action="UpdatePatients" method="post">
+    <input type="hidden" asp-for="id" />
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label">Full Name</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="BirthDate" class="form-label">Birth Date</label>
+        <input asp-for="BirthDate" class="form-control" type="date" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="BloodType" class="form-label">Blood Type</label>
+        <input asp-for="BloodType" class="form-control" placeholder="e.g. A+, O-" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="EmergencyContact" class="form-label">Emergency Contact</label>
+        <input asp-for="EmergencyContact" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Allergies" class="form-label">Allergies</label>
+        <textarea asp-for="Allergies" class="form-control" rows="3"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="ManagePatients" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

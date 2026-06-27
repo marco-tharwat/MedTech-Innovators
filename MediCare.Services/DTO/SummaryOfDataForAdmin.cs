@@ -1,7 +1,4 @@
-﻿using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace MediCare.Services.DTO
-{
+﻿namespace MediCare.Services.DTO;
     public class SummaryOfDataForAdmin
     {
         public int TotalNumberOfDoctors { get; set; }
@@ -11,4 +8,3 @@ namespace MediCare.Services.DTO
         public int NumOfAppointmentsScheduledForToday { get; set; }
 
     }
-}

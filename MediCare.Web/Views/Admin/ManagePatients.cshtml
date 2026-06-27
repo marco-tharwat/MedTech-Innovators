@@ -15,8 +15,8 @@
         <tr>
             <th>Name</th>
             <th>Email</th>
-            <th>Phone</th>
             <th>Blood Type</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -25,8 +25,10 @@
             <tr>
                 <td>@patient.User?.FullName</td>
                 <td>@patient.User?.Email</td>
-                <td>@patient.User?.PhoneNumber</td>
                 <td>@patient.BloodType</td>
+                <td>
+                    <a asp-action="UpdatePatients" asp-route-id="@patient.Id" class="btn btn-sm btn-primary">Edit</a>
+                </td>
             </tr>
         }
     </tbody>

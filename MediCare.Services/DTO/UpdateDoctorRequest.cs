@@ -1,5 +1,4 @@
-﻿namespace MediCare.Services.DTO
-{
+﻿namespace MediCare.Services.DTO;
     public class UpdateDoctorRequest
     {
         public string id { get; set; } = null!;
@@ -10,4 +9,3 @@
         public bool IsApproved { get; set; }
         public int SpecializationId { get; set; }
     }
-}

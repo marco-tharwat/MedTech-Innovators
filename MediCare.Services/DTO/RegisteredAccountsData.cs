@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MediCare.Services.DTO
-{
+﻿namespace MediCare.Services.DTO;
     public class RegisteredAccountsData
     {
         public string Name { get; set; } = null!;
@@ -13,4 +6,3 @@ namespace MediCare.Services.DTO
         public string Role { get; set; } = null!;
         public DateTime? Created { get; set; }
     }
-}

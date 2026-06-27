@@ -23,6 +23,7 @@ namespace MediCare.Web.Controllers
 
             var all = await _unitOfWork.Repository<Notification>().FindAsync(x=>x.UserId==userId);
             var notifications = all.OrderByDescending(n => n.CreatedAt).ToList();
+            ViewBag.Role = (User.FindFirst(ClaimTypes.Role)?.Value ??"").ToLower();
 
             return View(notifications);
         }

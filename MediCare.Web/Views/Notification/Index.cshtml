@@ -3,8 +3,8 @@
 
 @{
     ViewData["Title"] = "My Notifications";
+    Layout = ViewBag.Role == "admin" ? "_AdminLayout" : "_Layout";
 }
-
 <h2>My Notifications</h2>
 
 @if (!Model.Any())

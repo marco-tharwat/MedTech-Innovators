@@ -1,16 +1,48 @@
-﻿@{
-    Layout = "_AdminLayout";
-}
-@using MediCare.Data.Models
-@using MediCare.Data.Models.Enum
-@model IEnumerable<Appointment>
+﻿@using MediCare.Data.Models.Enum
+@using MediCare.Services.DTO
+@model AppointmentsDTO
 
 @{
+    Layout = "_AdminLayout";
     ViewData["Title"] = "All Appointments";
 }
 
 <h2>All Appointments</h2>
 
+@* Filter Bar *@
+<form method="get" asp-action="AllAppointments" class="row g-2 mb-4">
+    <div class="col-md-3">
+        <select name="status" class="form-select" onchange="this.form.submit()">
+            <option value="">All Statuses</option>
+            <option value="pending" selected="@(Model.Status == "pending")">Pending</option>
+            <option value="confirmed" selected="@(Model.Status == "confirmed")">Confirmed</option>
+            <option value="completed" selected="@(Model.Status == "completed")">Completed</option>
+            <option value="cancelled" selected="@(Model.Status == "cancelled")">Cancelled</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select name="date" class="form-select" onchange="this.form.submit()">
+            <option value="">All Dates</option>
+            <option value="today" selected="@(Model.Date == "today")">Today</option>
+            <option value="week" selected="@(Model.Date == "week")">This Week</option>
+            <option value="month" selected="@(Model.Date == "month")">This Month</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select name="order" class="form-select" onchange="this.form.submit()">
+            <option value="asc" selected="@(Model.Order == "asc")">Oldest First</option>
+            <option value="desc" selected="@(Model.Order == "desc")">Newest First</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <a asp-action="AllAppointments" class="btn btn-outline-secondary">Clear Filters</a>
+    </div>
+</form>
+
+@* Results Count *@
+<p class="text-muted">Showing @Model.Appointments.Count of @Model.TotalCount appointments</p>
+
+@* Table *@
 <table class="table table-striped">
     <thead>
         <tr>
@@ -24,34 +56,63 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var appt in Model)
+        @if (!Model.Appointments.Any())
         {
             <tr>
-                <td>@appt.Id</td>
-                <td>@appt.AppointmentDate.ToString("g")</td>
-                <td>
-                    <span class="badge bg-@(appt.Status switch {
-                        Status.Pending => "warning",
-                        Status.Confirmed => "success",
-                        Status.Completed => "info",
-                        Status.Cancelled => "danger",
-                        _ => "secondary"
-                    })">@appt.Status</span>
-                </td>
-                <td>@appt.Doctor?.User?.FullName</td>
-                <td>@appt.Patient?.User?.FullName</td>
-                <td>@(appt.Notes ?? "-")</td>
-                <td>
-                    <form asp-action="UpdateAppointmentStatus" method="post" class="d-inline">
-                        <input type="hidden" name="id" value="@appt.Id" />
-                        <button type="submit" name="status" value="confirmed" class="btn btn-sm btn-success">Confirm</button>
-                        <button type="submit" name="status" value="completed" class="btn btn-sm btn-info">Complete</button>
-                        <button type="submit" name="status" value="cancelled" class="btn btn-sm btn-danger">Cancel</button>
-                    </form>
-                </td>
+                <td colspan="7" class="text-center text-muted">No appointments found</td>
             </tr>
+        }
+        else
+        {
+            @foreach (var appt in Model.Appointments)
+            {
+                <tr>
+                    <td>@appt.Id</td>
+                    <td>@appt.AppointmentDate.ToString("g")</td>
+                    <td>
+                        <span class="badge bg-@(appt.Status switch {
+                            Status.Pending => "warning",
+                            Status.Confirmed => "success",
+                            Status.Completed => "info",
+                            Status.Cancelled => "danger",
+                            _ => "secondary"
+                        })">@appt.Status</span>
+                    </td>
+                    <td>@appt.Doctor?.User?.FullName</td>
+                    <td>@appt.Patient?.User?.FullName</td>
+                    <td>@(appt.Notes ?? "-")</td>
+                    <td>
+                        <form asp-action="UpdateAppointmentStatus" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@appt.Id" />
+                            <button type="submit" name="status" value="confirmed" class="btn btn-sm btn-success">Confirm</button>
+                            <button type="submit" name="status" value="completed" class="btn btn-sm btn-info">Complete</button>
+                            <button type="submit" name="status" value="cancelled" class="btn btn-sm btn-danger">Cancel</button>
+                        </form>
+                    </td>
+                </tr>
+            }
         }
     </tbody>
 </table>
+
+@* Pagination *@
+@if (Model.NumOfPages > 1)
+{
+    <nav>
+        <ul class="pagination justify-content-center">
+            @for (int i = 1; i <= Model.NumOfPages; i++)
+            {
+                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                    <a class="page-link" asp-action="AllAppointments"
+                       asp-route-status="@Model.Status"
+                       asp-route-date="@Model.Date"
+                       asp-route-order="@Model.Order"
+                       asp-route-pageNum="@i">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}
 
 <a asp-action="Dashboard" class="btn btn-secondary">Back</a>

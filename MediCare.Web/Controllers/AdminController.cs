@@ -1,7 +1,9 @@
 ﻿using MediCare.Data.Models;
+using MediCare.Data.Models.Enum;
 using MediCare.Data.Repositories.Interfaces;
 using MediCare.Services.DTO;
 using MediCare.Services.Services.Interfaces;
+using MediCare.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -45,10 +47,10 @@ namespace MediCare.Web.Controllers
             return View("ManagePatients", data);
         }
         [HttpGet]
-        public async Task<IActionResult> AllAppointments()
+        public async Task<IActionResult> AllAppointments(string status,string order,string date,int PageNum)
         {
-            var data= await _adminServices.FetchAppointmentsData();
-            return View("AllAppointments", data);
+            var model = await _adminServices.SetTheAppointments(status,order,date,PageNum);
+            return View("AllAppointments", model);
         }
 
         [HttpPost]

@@ -211,5 +211,70 @@ namespace MediCare.Services.Services
             }
             return registeredAccountsDatas;
         }
+
+        public async Task<AppointmentsDTO> SetTheAppointments(string status, string order, string date, int PageNum)
+        {
+            var data = await FetchAppointmentsData();
+
+            if (!string.IsNullOrEmpty(date))
+            {
+                status = (status ?? "allData").ToLower();
+                switch (status)
+                {
+                    case "pending":
+                        data = data.Where(_ => _.Status == Status.Pending);
+                        break;
+                    case "confirmed":
+                        data = data.Where(_ => _.Status == Status.Confirmed);
+                        break;
+                    case "completed":
+                        data = data.Where(_ => _.Status == Status.Completed);
+                        break;
+                    case "cancelled":
+                        data = data.Where(_ => _.Status == Status.Cancelled);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (date is not null)
+            {
+                date = date.ToLower();
+
+                if (date == "today")
+                {
+                    data.Where(_ => _.AppointmentDate == DateTime.Today);
+                }
+                else if ("week" == date)
+                {
+                    data.Where(_ => _.AppointmentDate <= DateTime.Today && _.AppointmentDate >= DateTime.Today.AddDays(-6));
+                }
+                else if (date == "month")
+                {
+                    var r = data.Where(_ => _.AppointmentDate.Month == DateTime.Today.Month);
+                }
+            }
+
+            order = (order ?? "ASC").ToLower();
+            data = order == "desc" ? data.OrderByDescending(a => a.AppointmentDate) : data.OrderBy(a => a.AppointmentDate);
+
+            int pageSize = 3;
+            int totalCount = data.Count();
+            int numOfPages = (int)Math.Ceiling((double)totalCount / pageSize);
+            var model=data.Skip((PageNum - 1) * pageSize).Take(pageSize).ToList();
+
+
+            return new AppointmentsDTO
+            {
+                Appointments = model,
+                TotalCount=totalCount,
+                Status = status,
+                Date = date,
+                NumOfPages = numOfPages,
+                CurrentPage = PageNum,
+                Order = order ?? "ASC"
+            };
+        }
     }
 }

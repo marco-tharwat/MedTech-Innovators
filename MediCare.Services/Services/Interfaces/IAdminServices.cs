@@ -34,5 +34,7 @@ namespace MediCare.Services.Services.Interfaces
 
         Task<IEnumerable<RegisteredAccountsData>> SetRegisteredAccountsData();
 
+        Task<AppointmentsDTO> SetTheAppointments(string status, string order, string date, int PageNum);
+
     }
 }

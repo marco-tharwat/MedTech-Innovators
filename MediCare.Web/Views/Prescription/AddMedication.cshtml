@@ -1,0 +1,310 @@
+﻿@model MediCare.Web.ViewModels.BulkPrescriptionViewModel
+
+@{
+    ViewData["Title"] = "Add Medications";
+}
+
+<div class="container mt-4">
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+            <h3 class="mb-0">Add Medications</h3>
+        </div>
+
+        <div class="card-body">
+
+            <div asp-validation-summary="ModelOnly"
+                 class="alert alert-danger">
+            </div>
+
+            <form asp-action="AddMedication" method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input asp-for="MedicalRecordId" type="hidden" />
+
+                <div id="medicationContainer">
+
+                    <div class="card border mb-3 medication-item">
+
+                        <div class="card-header d-flex justify-content-between align-items-center">
+
+                            <span class="medication-title">
+                                Medication #1
+                            </span>
+
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger remove-medication">
+                                Remove
+                            </button>
+
+                        </div>
+
+                        <div class="card-body">
+
+                            <div class="row">
+
+                                <div class="col-md-6 mb-3">
+
+                                    <label class="form-label">
+                                        Medication Name
+                                    </label>
+
+                                    <input name="Medications[0].MedicationName"
+                                           class="form-control" />
+
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+
+                                    <label class="form-label">
+                                        Dosage
+                                    </label>
+
+                                    <input name="Medications[0].Dosage"
+                                           class="form-control" />
+
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+
+                                    <label class="form-label">
+                                        Frequency
+                                    </label>
+
+                                    <input name="Medications[0].Frequency"
+                                           class="form-control" />
+
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+
+                                    <label class="form-label">
+                                        Duration
+                                    </label>
+
+                                    <input name="Medications[0].Duration"
+                                           class="form-control" />
+
+                                </div>
+
+                                <div class="col-12">
+
+                                    <label class="form-label">
+                                        Instructions
+                                    </label>
+
+                                    <textarea name="Medications[0].Instructions"
+                                              rows="3"
+                                              class="form-control"></textarea>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="d-flex justify-content-between">
+
+                    <button type="button"
+                            id="addMedicationBtn"
+                            class="btn btn-outline-primary">
+                        Add Another Medication
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Save Medications
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        let medicationIndex = 1;
+
+        function reindexMedications() {
+
+            const cards =
+                document.querySelectorAll(".medication-item");
+
+            cards.forEach((card, index) => {
+
+                const title =
+                    card.querySelector(".medication-title");
+
+                if (title) {
+                    title.textContent =
+                        `Medication #${index + 1}`;
+                }
+
+                const inputs =
+                    card.querySelectorAll("input, textarea");
+
+                inputs.forEach(input => {
+
+                    const currentName =
+                        input.getAttribute("name");
+
+                    if (!currentName) return;
+
+                    input.setAttribute(
+                        "name",
+                        currentName.replace(
+                            /Medications\[\d+\]/,
+                            `Medications[${index}]`
+                        )
+                    );
+                });
+            });
+
+            medicationIndex = cards.length;
+        }
+
+        function attachRemoveHandler(button) {
+
+            button.addEventListener("click", function () {
+
+                const cards =
+                    document.querySelectorAll(".medication-item");
+
+                if (cards.length === 1)
+                    return;
+
+                button.closest(".medication-item").remove();
+
+                reindexMedications();
+            });
+        }
+
+        document.querySelectorAll(".remove-medication")
+            .forEach(button => {
+                attachRemoveHandler(button);
+            });
+
+        document
+            .getElementById("addMedicationBtn")
+            .addEventListener("click", function () {
+
+                const container =
+                    document.getElementById("medicationContainer");
+
+                const card =
+                    document.createElement("div");
+
+                card.className =
+                    "card border mb-3 medication-item";
+
+                card.innerHTML = `
+
+                    <div class="card-header d-flex justify-content-between align-items-center">
+
+                        <span class="medication-title">
+                            Medication #${medicationIndex + 1}
+                        </span>
+
+                        <button type="button"
+                                class="btn btn-sm btn-outline-danger remove-medication">
+                            Remove
+                        </button>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    Medication Name
+                                </label>
+
+                                <input
+                                    name="Medications[${medicationIndex}].MedicationName"
+                                    class="form-control" />
+
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    Dosage
+                                </label>
+
+                                <input
+                                    name="Medications[${medicationIndex}].Dosage"
+                                    class="form-control" />
+
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    Frequency
+                                </label>
+
+                                <input
+                                    name="Medications[${medicationIndex}].Frequency"
+                                    class="form-control" />
+
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    Duration
+                                </label>
+
+                                <input
+                                    name="Medications[${medicationIndex}].Duration"
+                                    class="form-control" />
+
+                            </div>
+
+                            <div class="col-12">
+
+                                <label class="form-label">
+                                    Instructions
+                                </label>
+
+                                <textarea
+                                    name="Medications[${medicationIndex}].Instructions"
+                                    rows="3"
+                                    class="form-control"></textarea>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                `;
+
+                container.appendChild(card);
+
+                attachRemoveHandler(
+                    card.querySelector(".remove-medication")
+                );
+
+                medicationIndex++;
+            });
+
+    </script>
+}

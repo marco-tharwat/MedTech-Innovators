@@ -1,0 +1,36 @@
+﻿@{
+    Layout = "_AdminLayout";
+}
+
+@using MediCare.Services.DTO
+@model IEnumerable<SpecializationSetup>
+
+@{
+    ViewData["Title"] = "Specializations";
+}
+
+<h2>Specializations</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var spec in Model)
+        {
+            <tr>
+                <td>@spec.id</td>
+                <td>@spec.Name</td>
+                <td>
+                    <a asp-action="Specialization" asp-route-id="@spec.id" class="btn btn-sm btn-primary">View Doctors</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Dashboard" class="btn btn-secondary">Back</a>

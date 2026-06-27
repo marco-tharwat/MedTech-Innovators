@@ -22,26 +22,22 @@
 
                         <div class="mb-3">
                             <label asp-for="Name" class="form-label"></label>
-                            <input asp-for="Name" class="form-control form-control-lg" placeholder="Enter your username" />
-                            @* <span asp-validation-for="Name" class="text-danger"></span> *@
+                            <input asp-for="Name" class="form-control form-control-lg" placeholder="Enter your full name" />
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="UserName" class="form-label"></label>
                             <input asp-for="UserName" class="form-control form-control-lg" placeholder="Enter your username" />
-                            @* <span asp-validation-for="UserName" class="text-danger"></span> *@
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="Email" class="form-label"></label>
                             <input asp-for="Email" class="form-control form-control-lg" placeholder="Enter your Email" />
-                            @* <span asp-validation-for="Email" class="text-danger"></span> *@
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="Password" class="form-label"></label>
                             <input asp-for="Password" type="password" class="form-control form-control-lg" placeholder="Enter password" />
-                            @* <span asp-validation-for="Password" class="text-danger"></span> *@
                         </div>
 
                         <div class="mb-3">
@@ -51,17 +47,23 @@
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
                             </select>
-                            @* <span asp-validation-for="Gender" class="text-danger"></span> *@
                         </div>
 
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label asp-for="Role" class="form-label"></label>
-                            <select asp-for="Role" class="form-select form-select-lg">
+                            <select asp-for="Role" class="form-select form-select-lg" id="roleSelect">
                                 <option value="">Choose role</option>
                                 <option value="Doctor">Doctor</option>
                                 <option value="Patient">Patient</option>
                             </select>
-                            @* <span asp-validation-for="Role" class="text-danger"></span> *@
+                        </div>
+
+                        <div class="mb-3" id="specializationBox" style="display: none;">
+                            <label asp-for="SpecializationId" class="form-label">Specialization</label>
+                            <select asp-for="SpecializationId" class="form-select form-select-lg" asp-items="ViewBag.Specializations">
+                                <option value="">Select Specialization</option>
+                            </select>
+                            <span asp-validation-for="SpecializationId" class="text-danger"></span>
                         </div>
 
                         <button type="submit" class="btn btn-primary btn-lg w-100 rounded-3">
@@ -81,4 +83,15 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('roleSelect').addEventListener('change', function () {
+            var specBox = document.getElementById('specializationBox');
+            if (this.value === 'Doctor') {
+                specBox.style.display = 'block';
+            } else {
+                specBox.style.display = 'none';
+                document.getElementById('SpecializationId').value = '';
+            }
+        });
+    </script>
 }

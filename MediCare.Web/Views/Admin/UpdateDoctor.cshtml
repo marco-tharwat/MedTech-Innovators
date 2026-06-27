@@ -1,0 +1,61 @@
+﻿@{
+    Layout = "_AdminLayout";
+}
+
+@using MediCare.Services.DTO
+@model UpdateDoctorRequest
+
+@{
+    ViewData["Title"] = "Update Doctor";
+}
+
+<h2>Update Doctor</h2>
+
+<form asp-action="UpdateDoctor" method="post">
+    <input type="hidden" asp-for="id" />
+    <input type="hidden" name="specID" value="@Context.Request.Query["specID"]" />
+
+    <div class="mb-3">
+        <label class="form-label">User ID</label>
+        <input class="form-control" value="@Model.id" disabled />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ConsultationFee" class="form-label">Consultation Fee</label>
+        <input asp-for="ConsultationFee" class="form-control" type="number" step="0.01" />
+        <span asp-validation-for="ConsultationFee" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Bio" class="form-label">Bio</label>
+        <textarea asp-for="Bio" class="form-control" rows="3"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ImageURL" class="form-label">Image URL</label>
+        <input asp-for="ImageURL" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Location" class="form-label">Location</label>
+        <input asp-for="Location" class="form-control" />
+    </div>
+
+    <div class="mb-3 form-check">
+        <input asp-for="IsApproved" class="form-check-input" type="checkbox" />
+        <label asp-for="IsApproved" class="form-check-label">Approved</label>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="SpecializationId" class="form-label">Specialization ID</label>
+        <input asp-for="SpecializationId" class="form-control" type="number" />
+        <span asp-validation-for="SpecializationId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Specialization" asp-route-id="@Context.Request.Query["specID"]" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

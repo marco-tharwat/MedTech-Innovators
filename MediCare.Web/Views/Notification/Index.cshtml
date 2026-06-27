@@ -1,0 +1,40 @@
+﻿@using MediCare.Data.Models
+@model IEnumerable<Notification>
+
+@{
+    ViewData["Title"] = "My Notifications";
+    Layout = ViewBag.Role == "admin" ? "_AdminLayout" : "_Layout";
+}
+<h2>My Notifications</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No notifications yet.</div>
+}
+else
+{
+    <div class="list-group">
+        @foreach (var n in Model)
+        {
+            <div class="list-group-item d-flex justify-content-between align-items-center @(n.IsRead ? "" : "list-group-item-primary")">
+                <div>
+                    <p class="mb-1">@n.Message</p>
+                    <small class="text-muted">@n.CreatedAt.ToString("g")</small>
+                </div>
+                @if (!n.IsRead)
+                {
+                    <span class="badge bg-primary rounded-pill">New</span>
+                }
+            </div>
+        }
+    </div>
+}
+
+@if (ViewBag.Role == "admin")
+{
+    <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-secondary mt-3">Back</a>
+}
+else
+{
+    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary mt-3">Back</a>
+}

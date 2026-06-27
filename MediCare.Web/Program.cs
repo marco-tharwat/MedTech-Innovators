@@ -1,8 +1,10 @@
 using MediCare.Data.Models;
 using MediCare.Data.Repositories.Implementations;
 using MediCare.Data.Repositories.Interfaces;
-using MediCare.Services.Implementations;
 using MediCare.Services.Interfaces;
+using MediCare.Services.Services;
+using MediCare.Services.Services.Implementation;
+using MediCare.Services.Services.Interfaces;
 using MediCare.Web.Controllers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -21,12 +23,13 @@ builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IMedicalRecordRepository, MedicalRecordRepository>();
 
+//Services
+builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
+builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();
+builder.Services.AddScoped<IAdminServices, AdminServices>();
+
 // Unit of Work
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-// Services
-builder.Services.AddScoped<IAppointmentService, AppointmentService>();
-builder.Services.AddScoped<IWorkingHoursService, WorkingHoursService>();
 
 // Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -40,9 +43,11 @@ using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider
         .GetRequiredService<RoleManager<IdentityRole>>();
+
     await AccountController.SeedRoles(roleManager);
 }
 
+// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -51,6 +56,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 

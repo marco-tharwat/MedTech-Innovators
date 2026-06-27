@@ -1,10 +1,7 @@
 ﻿using MediCare.Data.Models;
 using MediCare.Data.Repositories.Interfaces;
 using MediCare.Services.DTO;
-using MediCare.Services.Factorys;
-using MediCare.Services.Services;
 using MediCare.Services.Services.Interfaces;
-using MediCare.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,30 +14,40 @@ namespace MediCare.Web.Controllers
         readonly UserManager<ApplicationUser> _userManager;
         readonly IUnitOfWork _unitOfWork;
         readonly IAdminServices _adminServices;
-        public AdminController(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork, IAdminServices adminServices)
+        public AdminController(
+            UserManager<ApplicationUser> userManager,
+            IUnitOfWork unitOfWork, 
+            IAdminServices adminServices)
         {
             _userManager = userManager;
             _unitOfWork = unitOfWork;
             _adminServices = adminServices;
         }
+
         [HttpGet]
-        [HttpGet] public IActionResult Dashboard() => View("Dashboard");
+        public async Task<ActionResult> Dashboard()
+        {
+            SummaryOfDataForAdmin model = await _adminServices.SetSummaryOfDataForAdmin();
+            return View("Dashboard",model);
+        }
+
         [HttpGet]
         public async Task<IActionResult> ManageDoctors()
         {
-            var data = await _unitOfWork.Doctors.GetAllAsync();
+            var data= await _adminServices.FetchDoctorsData();
             return View("ManageDoctors", data);
         }
+
         [HttpGet]
         public async Task<IActionResult> ManagePatients()
         {
-            var data = await _unitOfWork.Patients.GetAllAsync();
+            var data = await _adminServices.FetchPatientsData();
             return View("ManagePatients", data);
         }
         [HttpGet]
         public async Task<IActionResult> AllAppointments()
         {
-            var data = await _unitOfWork.Appointments.GetAllAsync();
+            var data= await _adminServices.FetchAppointmentsData();
             return View("AllAppointments", data);
         }
 
@@ -98,6 +105,13 @@ namespace MediCare.Web.Controllers
         {
             var data = await _adminServices.GetReportsAsync();
             return View(data);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> AllRegistered()
+        {
+            var dat = await _adminServices.SetRegisteredAccountsData();
+            return View(dat);
         }
     }
 }

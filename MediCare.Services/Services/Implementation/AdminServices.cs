@@ -4,11 +4,12 @@ using MediCare.Data.Repositories.Interfaces;
 using MediCare.Services.DTO;
 using MediCare.Services.Factorys;
 using MediCare.Services.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace MediCare.Services.Services
 {
-    public class AdminServices(IUnitOfWork _unitOfWork):IAdminServices
+    public class AdminServices(IUnitOfWork _unitOfWork,UserManager<ApplicationUser> _userManager):IAdminServices
     {
         public async Task<ReportsResponse> GetReportsAsync()
         {
@@ -100,8 +101,8 @@ namespace MediCare.Services.Services
 
         public async Task<Specialization?> GetSpecialization(int id)
         {
-            var res = await _unitOfWork.Repository<Specialization>().GetByIdAsync(id);
-            if (res is null) return null;
+            var res = await _unitOfWork.Repository<Specialization>()
+                .Query().Include(x => x.Doctors).ThenInclude(x=>x.User).FirstAsync(x => x.Id == id);
             return res;
         }
 
@@ -145,6 +146,70 @@ namespace MediCare.Services.Services
             _unitOfWork.Appointments.Update(appointment);
             await _unitOfWork.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<SummaryOfDataForAdmin> SetSummaryOfDataForAdmin()
+        {
+            var ListDoctors = await _unitOfWork.Doctors.GetAllAsync();
+            int TotalNumberOfDoctors= ListDoctors.Count();
+            int DoctorsPending=ListDoctors.Where(x=>x.IsApproved==false).Count();
+
+            var ListOfPatients=await _unitOfWork.Patients.GetAllAsync();
+            int TotalNumberOfPatients = ListOfPatients.Count();
+
+            var ListOfAppointments=await _unitOfWork.Appointments.GetAllAsync();
+            int NumOfAppointments = ListOfAppointments.Count();
+            int NumOfAppointmentsScheduledForToday = ListOfAppointments.Where(x => x.AppointmentDate.Date == DateTime.Today).Count();
+
+            return new SummaryOfDataForAdmin
+            {
+                TotalNumberOfDoctors= TotalNumberOfDoctors,
+                TotalNumberOfPatients= TotalNumberOfPatients,
+                DoctorsPending= DoctorsPending,
+                NumOfAppointments= NumOfAppointments,
+                NumOfAppointmentsScheduledForToday = NumOfAppointmentsScheduledForToday
+            };
+        }
+
+        public async Task<Doctor?> FetchDoctorData(int id)
+        {
+            var data = await _unitOfWork.Doctors.Query().Include(x => x.User).FirstAsync(x=>x.Id==id);
+            return data;
+        }
+
+        public async Task<IEnumerable<Doctor>> FetchDoctorsData()
+        {
+            var data =_unitOfWork.Doctors.Query().Include(x => x.User).Include(_=>_.Specialization).AsEnumerable();
+            return data;
+        }
+
+        public async Task<IEnumerable<Patient>> FetchPatientsData()
+        {
+            var data = _unitOfWork.Patients.Query().Include(_ => _.User).AsEnumerable();
+            return data;
+        }
+
+        public async Task<IEnumerable<Appointment>> FetchAppointmentsData()
+        {
+            return _unitOfWork.Appointments
+                .Query()
+                .Include(_ => _.Doctor).ThenInclude(_ => _.User)
+                .Include(_ => _.Patient).ThenInclude(_ => _.User).AsEnumerable();
+        }
+
+        public async Task<IEnumerable<RegisteredAccountsData>> SetRegisteredAccountsData()
+        {
+            var data = await _unitOfWork.Repository<ApplicationUser>().GetAllAsync();
+            List<RegisteredAccountsData> registeredAccountsDatas = new();
+            foreach(var item in data)
+            {
+                var roles = await _userManager.GetRolesAsync(item);
+                var role=roles[0];
+                registeredAccountsDatas
+                    .Add(new RegisteredAccountsData 
+                    { Name = item.UserName ?? "", Email = item.Email, Role = role, Created = item.Created });
+            }
+            return registeredAccountsDatas;
         }
     }
 }

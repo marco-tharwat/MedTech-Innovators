@@ -10,7 +10,7 @@ namespace MediCare.Data.Models
         public Gender Gender { get; set; }
         public Doctor? DoctorProfile { get; set; }
         public Patient? PatientProfile { get; set; }
-
+        public DateTime? Created { get; set; }
         public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
     }
 }

@@ -21,5 +21,18 @@ namespace MediCare.Services.Services.Interfaces
         Task<IEnumerable<SpecializationSetup>?> GetSpecializationSetupAsync();
 
         Task<bool> UpdateAppointmentStatus(string status, int id);
+
+        Task<SummaryOfDataForAdmin> SetSummaryOfDataForAdmin();
+
+        Task<Doctor?> FetchDoctorData(int id);
+
+        Task<IEnumerable<Doctor>> FetchDoctorsData();
+
+        Task<IEnumerable<Patient>> FetchPatientsData();
+        
+        Task<IEnumerable<Appointment>> FetchAppointmentsData();
+
+        Task<IEnumerable<RegisteredAccountsData>> SetRegisteredAccountsData();
+
     }
 }

@@ -41,7 +41,7 @@ namespace MediCare.Web.Controllers
             }
 
             ApplicationUser user = new ApplicationUser
-            { FullName = request.Name, Gender = request.Gender, Email = request.Email, UserName = request.UserName };
+            { FullName = request.Name, Gender = request.Gender, Email = request.Email, UserName = request.UserName ,Created=DateTime.Today};
 
             var res = await _userManager.CreateAsync(user, request.Password);
 

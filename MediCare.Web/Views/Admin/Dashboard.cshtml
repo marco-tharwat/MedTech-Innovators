@@ -1,5 +1,69 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@using MediCare.Services.DTO
+@model SummaryOfDataForAdmin
+
 @{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Admin Dashboard";
 }
+
+<h2>Admin Dashboard</h2>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Doctors</h5>
+                <h2>@Model.TotalNumberOfDoctors</h2>
+                <p class="mb-1">@Model.DoctorsPending pending approval</p>
+                <a asp-action="ManageDoctors" class="btn btn-light btn-sm mt-2">Manage</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Patients</h5>
+                <h2>@Model.TotalNumberOfPatients</h2>
+                <p class="mb-1">Registered patients</p>
+                <a asp-action="ManagePatients" class="btn btn-light btn-sm mt-2">Manage</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Appointments</h5>
+                <h2>@Model.NumOfAppointments</h2>
+                <p class="mb-1">@Model.NumOfAppointmentsScheduledForToday scheduled for today</p>
+                <a asp-action="AllAppointments" class="btn btn-light btn-sm mt-2">View All</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Specializations</h5>
+                <a asp-action="Specializations_" class="btn btn-light btn-sm">Manage</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-danger mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Reports</h5>
+                <a asp-action="Reports" class="btn btn-light btn-sm">View Reports</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-dark mb-3">
+            <div class="card-body">
+                <h5 class="card-title">All Accounts</h5>
+                <a asp-action="AllRegistered" class="btn btn-light btn-sm">View All Users</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MediCare.Data.Models
+namespace MediCare.Data.Models.Enum
 {
     public enum Status
     {

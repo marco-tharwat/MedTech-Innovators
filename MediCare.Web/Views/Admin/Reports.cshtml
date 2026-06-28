@@ -1,0 +1,84 @@
+﻿@using MediCare.Services.DTO
+@model ReportsResponse
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Reports";
+}
+
+<h2>Reports</h2>
+
+<div class="row mt-4">
+    <!-- Appointments Per Doctor -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Appointments Per Doctor</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Doctor</th>
+                            <th>Total Appointments</th>
+                            <th>Recent Appointments</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.appointmentsPerDoctor)
+                        {
+                            <tr>
+                                <td>@item.Key</td>
+                                <td>@item.Value.Count</td>
+                                <td>
+                                    <ul class="list-unstyled mb-0">
+                                        @foreach (var appt in item.Value.OrderByDescending(a => a.AppointmentDate).Take(3))
+                                        {
+                                            <li class="small text-muted">
+                                                @appt.AppointmentDate.ToString("g") — @appt.Status
+                                            </li>
+                                        }
+                                        @if (item.Value.Count > 3)
+                                        {
+                                            <li class="small text-muted">...and @(item.Value.Count - 3) more</li>
+                                        }
+                                    </ul>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Specializations Count -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Appointments Per Specialization</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Specialization</th>
+                            <th>Total Appointments</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.specializationsCount.OrderByDescending(x => x.Value))
+                        {
+                            <tr>
+                                <td>@item.Key</td>
+                                <td>@item.Value</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a asp-action="Dashboard" class="btn btn-secondary">Back to Dashboard</a>

@@ -1,4 +1,4 @@
-﻿namespace MediCare.Data.Models
+﻿namespace MediCare.Data.Models.Enum
 {
     public enum Gender
     {

@@ -1,8 +1,10 @@
 using MediCare.Data.Models;
-using MediCare.Services.Interfaces;
+using MediCare.Data.Models.Enum;
+using MediCare.Services.Services.Interfaces;
 using MediCare.Web.ViewModels;
 using Microsoft.EntityFrameworkCore;
-namespace MediCare.Services.Implementations
+
+namespace MediCare.Services.Services.Implementation
 {
     public class WorkingHoursService : IWorkingHoursService
     {
@@ -98,21 +100,6 @@ namespace MediCare.Services.Implementations
             _context.WorkingHours.Remove(workingHours);
             await _context.SaveChangesAsync();
             return ServiceResult.Success();
-        }
-
-        Task<ServiceResult> IWorkingHoursService.AddAsync(WorkingHours workingHours)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<ServiceResult> IWorkingHoursService.UpdateAsync(WorkingHours workingHours)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<ServiceResult> IWorkingHoursService.DeleteAsync(int id)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -1,10 +1,10 @@
 using MediCare.Data.Models;
-using MediCare.Data.Repositories.Interfaces;
-using MediCare.Services.Interfaces;
+using MediCare.Data.Models.Enum;
+using MediCare.Services.Services.Interfaces;
 using MediCare.Web.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
-namespace MediCare.Services.Implementations
+namespace MediCare.Services.Services.Implementation
 {
     public class AppointmentService : IAppointmentService
     {
@@ -15,6 +15,8 @@ namespace MediCare.Services.Implementations
         {
             _context = context;
         }
+
+        // ── Queries ───────────────────────────────────────────────────────────
 
         public async Task<IEnumerable<Appointment>> GetByDoctorIdAsync(int doctorId)
         {
@@ -43,35 +45,7 @@ namespace MediCare.Services.Implementations
                 .FirstOrDefaultAsync(a => a.Id == id);
         }
 
-        public async Task<IEnumerable<DateTime>> GetAvailableSlotsAsync(int doctorId, DateTime date)
-        {
-            var workingHours = await _context.WorkingHours
-                .FirstOrDefaultAsync(w => w.DoctorId == doctorId && w.DayOfWeek == date.DayOfWeek);
-
-            if (workingHours is null)
-                return Enumerable.Empty<DateTime>();
-
-            // ولّد كل الـ slots
-            var slots = new List<DateTime>();
-            var current = date.Date.Add(workingHours.StartTime);
-            var end     = date.Date.Add(workingHours.EndTime);
-
-            while (current.AddMinutes(SlotDurationMinutes) <= end)
-            {
-                slots.Add(current);
-                current = current.AddMinutes(SlotDurationMinutes);
-            }
-
-            // جيب المحجوز
-            var booked = await _context.Appointments
-                .Where(a => a.DoctorId == doctorId
-                         && a.AppointmentDate.Date == date.Date
-                         && a.Status != Status.Cancelled)
-                .Select(a => a.AppointmentDate)
-                .ToListAsync();
-
-            return slots.Where(s => s > DateTime.Now && !booked.Contains(s)).ToList();
-        }
+        // ── Book ──────────────────────────────────────────────────────────────
 
         public async Task<ServiceResult> BookAsync(int patientId, int doctorId, DateTime slot, string? notes)
         {
@@ -87,6 +61,7 @@ namespace MediCare.Services.Implementations
             if (slot.TimeOfDay < workingHours.StartTime || slot.TimeOfDay >= workingHours.EndTime)
                 return ServiceResult.Failure("Selected time is outside the doctor's working hours.");
 
+            // Conflict detection — prevent double-booking
             var isTaken = await _context.Appointments
                 .AnyAsync(a => a.DoctorId == doctorId
                             && a.AppointmentDate == slot
@@ -97,16 +72,61 @@ namespace MediCare.Services.Implementations
 
             await _context.Appointments.AddAsync(new Appointment
             {
-                PatientId       = patientId,
-                DoctorId        = doctorId,
+                PatientId = patientId,
+                DoctorId = doctorId,
                 AppointmentDate = slot,
-                Notes           = notes,
-                Status          = Status.Pending
+                Notes = notes,
+                Status = Status.Pending
             });
 
             await _context.SaveChangesAsync();
             return ServiceResult.Success();
         }
+
+        // ── Approve ───────────────────────────────────────────────────────────
+
+        public async Task<ServiceResult> ApproveAsync(int appointmentId, string doctorUserId)
+        {
+            var appointment = await GetByIdAsync(appointmentId);
+            if (appointment is null)
+                return ServiceResult.Failure("Appointment not found.");
+
+            // Only the doctor assigned to this appointment can approve
+            if (appointment.Doctor.UserId != doctorUserId)
+                return ServiceResult.Failure("You are not authorised to approve this appointment.");
+
+            if (appointment.Status != Status.Pending)
+                return ServiceResult.Failure("Only pending appointments can be approved.");
+
+            appointment.Status = Status.Confirmed;
+            await _context.SaveChangesAsync();
+            return ServiceResult.Success();
+        }
+
+        // ── Reject ────────────────────────────────────────────────────────────
+
+        public async Task<ServiceResult> RejectAsync(int appointmentId, string doctorUserId)
+        {
+            var appointment = await GetByIdAsync(appointmentId);
+            if (appointment is null)
+                return ServiceResult.Failure("Appointment not found.");
+
+            // Only the doctor assigned to this appointment can reject
+            if (appointment.Doctor.UserId != doctorUserId)
+                return ServiceResult.Failure("You are not authorised to reject this appointment.");
+
+            if (appointment.Status == Status.Completed)
+                return ServiceResult.Failure("A completed appointment cannot be rejected.");
+
+            if (appointment.Status == Status.Cancelled)
+                return ServiceResult.Failure("This appointment is already cancelled.");
+
+            appointment.Status = Status.Cancelled;
+            await _context.SaveChangesAsync();
+            return ServiceResult.Success();
+        }
+
+        // ── Cancel ────────────────────────────────────────────────────────────
 
         public async Task<ServiceResult> CancelAsync(int appointmentId, string requestingUserId)
         {
@@ -114,8 +134,9 @@ namespace MediCare.Services.Implementations
             if (appointment is null)
                 return ServiceResult.Failure("Appointment not found.");
 
+            // Only the patient who owns it or the doctor can cancel
             bool isOwner = appointment.Patient.UserId == requestingUserId
-                        || appointment.Doctor.UserId  == requestingUserId;
+                        || appointment.Doctor.UserId == requestingUserId;
             if (!isOwner)
                 return ServiceResult.Failure("You are not authorised to cancel this appointment.");
 
@@ -130,6 +151,8 @@ namespace MediCare.Services.Implementations
             return ServiceResult.Success();
         }
 
+        // ── Reschedule ────────────────────────────────────────────────────────
+
         public async Task<ServiceResult> RescheduleAsync(int appointmentId, DateTime newSlot, string requestingUserId)
         {
             var appointment = await GetByIdAsync(appointmentId);
@@ -137,7 +160,7 @@ namespace MediCare.Services.Implementations
                 return ServiceResult.Failure("Appointment not found.");
 
             bool isOwner = appointment.Patient.UserId == requestingUserId
-                        || appointment.Doctor.UserId  == requestingUserId;
+                        || appointment.Doctor.UserId == requestingUserId;
             if (!isOwner)
                 return ServiceResult.Failure("You are not authorised to reschedule this appointment.");
 
@@ -159,6 +182,7 @@ namespace MediCare.Services.Implementations
             if (newSlot.TimeOfDay < workingHours.StartTime || newSlot.TimeOfDay >= workingHours.EndTime)
                 return ServiceResult.Failure("Selected time is outside the doctor's working hours.");
 
+            // Conflict detection — exclude current appointment from check
             var isTaken = await _context.Appointments
                 .AnyAsync(a => a.DoctorId == appointment.DoctorId
                             && a.AppointmentDate == newSlot
@@ -169,7 +193,7 @@ namespace MediCare.Services.Implementations
                 return ServiceResult.Failure("This slot is already booked. Please choose another.");
 
             appointment.AppointmentDate = newSlot;
-            appointment.Status          = Status.Pending;
+            appointment.Status = Status.Pending;
             await _context.SaveChangesAsync();
             return ServiceResult.Success();
         }

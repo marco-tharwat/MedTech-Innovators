@@ -1,7 +1,7 @@
 using MediCare.Data.Models;
 using MediCare.Web.ViewModels;
 
-namespace MediCare.Services.Interfaces
+namespace MediCare.Services.Services.Interfaces
 {
     public interface IWorkingHoursService
     {

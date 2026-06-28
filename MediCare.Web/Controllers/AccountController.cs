@@ -41,7 +41,7 @@ namespace MediCare.Web.Controllers
             }
 
             ApplicationUser user = new ApplicationUser
-            { FullName = request.Name, Gender = request.Gender, Email = request.Email, UserName = request.UserName ,Created=DateTime.Today};
+            { FullName = request.Name, Gender = request.Gender, Email = request.Email, UserName = request.UserName, Created = DateTime.Today };
 
             var res = await _userManager.CreateAsync(user, request.Password);
 
@@ -55,7 +55,7 @@ namespace MediCare.Web.Controllers
                     doctor.User = user;
                     doctor.UserId = user.Id;
                     doctor.IsApproved = false;
-                    doctor.SpecializationId=request.SpecializationId ?? 0;
+                    doctor.SpecializationId = request.SpecializationId ?? 0;
                     await _unitOfWork.Doctors.AddAsync(doctor);
                 }
                 else

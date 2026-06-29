@@ -10,5 +10,7 @@ namespace MediCare.Data.Repositories.Interfaces
         Task<Patient?> GetPatientByUserIdAsync(string userId);
         Task<IEnumerable<Patient>> GetAllWithUsersAsync();
 
+        Task<Patient> GetByUserId(string userId);
+
     }
 }

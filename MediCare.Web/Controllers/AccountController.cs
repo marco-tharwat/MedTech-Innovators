@@ -49,6 +49,7 @@ namespace MediCare.Web.Controllers
 
             if (res.Succeeded)
             {
+                
                 if (request.Role == "Doctor")
                 {
                     Doctor doctor = new();
@@ -61,6 +62,10 @@ namespace MediCare.Web.Controllers
                 else
                 {
                     Patient patient = new Patient();
+                    user.PatientProfile = new Patient
+                    {
+                        Id = patient.Id
+                    };
                     patient.User = user;
                     patient.UserId = user.Id;
                     await _unitOfWork.Patients.AddAsync(patient);

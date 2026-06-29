@@ -9,139 +9,111 @@ namespace MediCare.Web.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IUnitOfWork _unitOfWork;
+        readonly UserManager<ApplicationUser> _userManager;
+        readonly SignInManager<ApplicationUser> _signInManager;
+        readonly IUnitOfWork _unitOfWork;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            IUnitOfWork unitOfWork)
+            SignInManager<ApplicationUser> signInManager
+            , IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _unitOfWork = unitOfWork;
         }
 
-        // ================= REGISTER =================
         [HttpGet]
-        public async Task<IActionResult> Register()
+        public async Task<ActionResult> Register()
         {
             var specs = await _unitOfWork.Repository<Specialization>().GetAllAsync();
             ViewBag.Specializations = new SelectList(specs, "Id", "Name");
-            return View();
+            return View("Register");
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register(RegisterRequest request)
+        public async Task<ActionResult> Register(RegisterRequest request)
         {
-            if (!ModelState.IsValid)
-                return View(request);
-
-            var user = new ApplicationUser
+            if (request == null)
             {
-                FullName = request.Name,
-                Gender = request.Gender,
-                Email = request.Email,
-                UserName = request.UserName,
-                Created = DateTime.Now
-            };
+                ModelState.AddModelError("", "the data is not found");
+                return RedirectToAction("Register");
+            }
 
-            var result = await _userManager.CreateAsync(user, request.Password);
+            ApplicationUser user = new ApplicationUser
+            { FullName = request.Name, Gender = request.Gender, Email = request.Email, UserName = request.UserName ,Created=DateTime.Today};
 
-            if (result.Succeeded)
+            var res = await _userManager.CreateAsync(user, request.Password);
+
+            await _userManager.AddToRoleAsync(user, request.Role);
+
+            if (res.Succeeded)
             {
-                // ✅ إضافة الـ Role
-                var roleResult = await _userManager.AddToRoleAsync(user, request.Role);
-
-                if (!roleResult.Succeeded)
-                {
-                    ModelState.AddModelError("", "Failed to assign role");
-                    return View(request);
-                }
-
-                // ✅ إنشاء Doctor أو Patient
                 if (request.Role == "Doctor")
                 {
-                    var doctor = new Doctor
-                    {
-                        UserId = user.Id,
-                        IsApproved = false,
-                        SpecializationId = request.SpecializationId ?? 0
-                    };
+                    Doctor doctor = new();
+                    doctor.User = user;
+                    doctor.UserId = user.Id;
+                    doctor.IsApproved = false;
+                    doctor.SpecializationId=request.SpecializationId ?? 0;
                     await _unitOfWork.Doctors.AddAsync(doctor);
                 }
                 else
                 {
-                    var patient = new Patient
-                    {
-                        UserId = user.Id
-                    };
+                    Patient patient = new Patient();
+                    patient.User = user;
+                    patient.UserId = user.Id;
                     await _unitOfWork.Patients.AddAsync(patient);
                 }
-
                 await _unitOfWork.SaveChangesAsync();
-
-                // 🔥 مهم جدًا: اعمل Logout عشان الـ Claims تتعمل صح
-                await _signInManager.SignOutAsync();
-
                 return RedirectToAction("Login");
             }
 
-            foreach (var error in result.Errors)
+            foreach (var error in res.Errors)
             {
                 ModelState.AddModelError("", error.Description);
             }
-
             var specs = await _unitOfWork.Repository<Specialization>().GetAllAsync();
             ViewBag.Specializations = new SelectList(specs, "Id", "Name");
-
-            return View(request);
+            return View("Register", request);
         }
 
-        // ================= LOGIN =================
         [HttpGet]
-        public IActionResult Login()
+        public ActionResult Login()
         {
-            return View();
+            return View("Login");
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(LoginRequest request)
+        public async Task<ActionResult> Login(LoginRequest request)
         {
-            if (!ModelState.IsValid)
-                return View(request);
-
-            var result = await _signInManager.PasswordSignInAsync(
-                request.UserName,
-                request.Password,
-                request.Rememberme,
-                false
-            );
-
-            if (result.Succeeded)
+            if (ModelState.IsValid)
             {
-                return RedirectToAction("Index", "Home");
+                if (request is null) return View("Login");
+                var user = await _userManager.FindByNameAsync(request.UserName);
+                if (user is null)
+                {
+                    ModelState.AddModelError("", "UserName is incorrect!");
+                    return View("Login");
+                }
+                var flag = await _userManager.CheckPasswordAsync(user, request.Password);
+                if (flag)
+                {
+                    await _signInManager.SignInAsync(user, request.Rememberme);
+                    return RedirectToAction("Index", "Home");
+                }
             }
-
-            ModelState.AddModelError("", "Invalid Username or Password");
-            return View(request);
+            ModelState.AddModelError("", "the password or UserName is incorrect!!!");
+            return View("Login");
         }
 
-        // ================= LOGOUT =================
-        public async Task<IActionResult> Logout()
+        [HttpGet]
+        public async Task<ActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
             return RedirectToAction("Login");
         }
 
-        // ================= ACCESS DENIED =================
-        public IActionResult AccessDenied()
-        {
-            return Content("Access Denied 🚫");
-        }
-
-        // ================= SEED ROLES =================
         public static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
         {
             if (!await roleManager.RoleExistsAsync("Admin"))

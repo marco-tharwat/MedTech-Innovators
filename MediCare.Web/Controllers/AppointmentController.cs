@@ -163,7 +163,8 @@ namespace MediCare.Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             //var patient = user?.PatientProfile;
             var id = user!.Id;
-            var patient = _patientRepository.GetByUserId(user!.Id);
+            Patient? patient =await _patientRepository.GetPatientByUserIdAsync(user!.Id);
+            var userid=patient!.UserId;
             if (patient is null) return Forbid();
             var appointments = await _appointmentService.GetByPatientIdAsync(patient.Id);
             return View(appointments.ToList());

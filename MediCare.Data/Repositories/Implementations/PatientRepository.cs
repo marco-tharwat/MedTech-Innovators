@@ -56,7 +56,7 @@ namespace MediCare.Data.Repositories.Implementations
         // search by id
         public async Task<Patient?> GetPatientByUserIdAsync(string userId)
         {
-            return await _context.Patients
+            return await _context.Patients.Include(p => p.User)
                 .FirstOrDefaultAsync(p => p.UserId == userId);
         }
         public async Task<IEnumerable<Patient>> GetAllWithUsersAsync()

@@ -16,6 +16,10 @@ namespace MediCare.Data.Repositories.Implementations
                 .FirstOrDefaultAsync(p => p.Id == patientId);
         }
 
+        public async Task<Patient?> GetByUserId(string userId)
+        {
+            return await _context.Patients.FirstOrDefaultAsync(_ => _.UserId == userId);
+        }
 
         public async Task<Patient?> GetPatientWithAppointmentsAsync(int patientId)
         {

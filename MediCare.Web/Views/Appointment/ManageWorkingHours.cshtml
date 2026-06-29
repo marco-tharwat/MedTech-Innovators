@@ -1,0 +1,107 @@
+@using MediCare.Data.Models
+@model List<WorkingHours>
+
+@{
+    ViewData["Title"] = "Manage Working Hours";
+    int doctorId = ViewBag.DoctorId;
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+
+            <h2 class="fw-bold mb-4">Manage Working Hours</h2>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">@TempData["Success"]</div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">@TempData["Error"]</div>
+            }
+
+            @* ---- Current working hours ---- *@
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-header bg-white py-3">
+                    <strong>Current Schedule</strong>
+                </div>
+                <div class="card-body p-0">
+                    @if (!Model.Any())
+                    {
+                        <div class="p-4 text-center text-muted">No working hours set yet.</div>
+                    }
+                    else
+                    {
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Day</th>
+                                    <th>Start</th>
+                                    <th>End</th>
+                                    <th class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var wh in Model)
+                                {
+                                    <tr>
+                                        <td class="ps-4">@wh.DayOfWeek</td>
+                                        <td>@wh.StartTime.ToString(@"hh\:mm")</td>
+                                        <td>@wh.EndTime.ToString(@"hh\:mm")</td>
+                                        <td class="text-end pe-4">
+                                            <form asp-action="DeleteWorkingHours" asp-controller="Appointment"
+                                                  asp-route-id="@wh.Id"
+                                                  method="post" class="d-inline"
+                                                  onsubmit="return confirm('Remove this day?');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+
+            @* ---- Add new working hours ---- *@
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-white py-3">
+                    <strong>Add Working Hours</strong>
+                </div>
+                <div class="card-body">
+                    <form asp-action="AddWorkingHours" asp-controller="Appointment" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="doctorId" value="@doctorId" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Day</label>
+                            <select name="dayOfWeek" class="form-select">
+                                @foreach (DayOfWeek day in Enum.GetValues(typeof(DayOfWeek)))
+                                {
+                                    <option value="@((int)day)">@day</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col">
+                                <label class="form-label">Start Time</label>
+                                <input type="time" name="startTime" class="form-control" required />
+                            </div>
+                            <div class="col">
+                                <label class="form-label">End Time</label>
+                                <input type="time" name="endTime" class="form-control" required />
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

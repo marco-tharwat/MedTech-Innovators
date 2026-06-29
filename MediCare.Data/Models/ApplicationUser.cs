@@ -1,6 +1,6 @@
 ﻿using MediCare.Data.Models.Enum;
 using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace MediCare.Data.Models
 {

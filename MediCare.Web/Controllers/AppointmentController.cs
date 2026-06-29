@@ -1,10 +1,13 @@
 using MediCare.Data.Models;
+using MediCare.Data.Repositories.Implementations;
+using MediCare.Data.Repositories.Interfaces;
 using MediCare.Services.Services.Interfaces;
 using MediCare.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace MediCare.Web.Controllers
 {
@@ -14,15 +17,18 @@ namespace MediCare.Web.Controllers
         private readonly IAppointmentService _appointmentService;
         private readonly IWorkingHoursService _workingHoursService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IPatientRepository _patientRepository;
 
         public AppointmentController(
             IAppointmentService appointmentService,
             IWorkingHoursService workingHoursService,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IPatientRepository patientRepository)
         {
             _appointmentService = appointmentService;
             _workingHoursService = workingHoursService;
             _userManager = userManager;
+            _patientRepository = patientRepository;
         }
 
         // ── Patient: Book ─────────────────────────────────────────────────────
@@ -153,10 +159,12 @@ namespace MediCare.Web.Controllers
         [Authorize(Roles = "Patient")]
         public async Task<IActionResult> PatientAppointments()
         {
+            var rol = (User.FindFirst(ClaimTypes.Role)?.Value ?? "");
             var user = await _userManager.GetUserAsync(User);
-            var patient = user?.PatientProfile;
+            //var patient = user?.PatientProfile;
+            var id = user!.Id;
+            var patient = _patientRepository.GetByUserId(user!.Id);
             if (patient is null) return Forbid();
-
             var appointments = await _appointmentService.GetByPatientIdAsync(patient.Id);
             return View(appointments.ToList());
         }

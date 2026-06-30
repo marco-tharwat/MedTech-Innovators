@@ -8,7 +8,7 @@ namespace MediCare.Data.Repositories.Implementations
     {
         public DoctorRepository(MedContext context) : base(context) { }
 
-        
+
         public async Task<Doctor?> GetDoctorWithSpecializationAsync(int doctorId)
         {
             return await _context.Doctors
@@ -44,6 +44,14 @@ namespace MediCare.Data.Repositories.Implementations
             return await _context.Doctors
                 .Include(d => d.Appointments)
                 .ToListAsync();
+        }
+
+        // get doctor by his userId (same pattern used in PatientRepository)
+        public async Task<Doctor?> GetDoctorByUserIdAsync(string userId)
+        {
+            return await _context.Doctors
+                .Include(d => d.Specialization)
+                .FirstOrDefaultAsync(d => d.UserId == userId);
         }
     }
 }

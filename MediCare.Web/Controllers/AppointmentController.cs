@@ -1,5 +1,4 @@
 using MediCare.Data.Models;
-using MediCare.Data.Repositories.Implementations;
 using MediCare.Data.Repositories.Interfaces;
 using MediCare.Services.Services.Interfaces;
 using MediCare.Web.ViewModels;
@@ -18,17 +17,20 @@ namespace MediCare.Web.Controllers
         private readonly IWorkingHoursService _workingHoursService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IPatientRepository _patientRepository;
+        private readonly IDoctorRepository _doctorRepository;
 
         public AppointmentController(
             IAppointmentService appointmentService,
             IWorkingHoursService workingHoursService,
             UserManager<ApplicationUser> userManager,
-            IPatientRepository patientRepository)
+            IPatientRepository patientRepository,
+            IDoctorRepository doctorRepository)
         {
             _appointmentService = appointmentService;
             _workingHoursService = workingHoursService;
             _userManager = userManager;
             _patientRepository = patientRepository;
+            _doctorRepository = doctorRepository;
         }
 
         // ── Patient: Book ─────────────────────────────────────────────────────
@@ -176,7 +178,7 @@ namespace MediCare.Web.Controllers
         public async Task<IActionResult> DoctorDailyList(DateTime? date)
         {
             var user = await _userManager.GetUserAsync(User);
-            var doctor = user?.DoctorProfile;
+            var doctor = await _doctorRepository.GetDoctorByUserIdAsync(user!.Id);
             if (doctor is null) return Forbid();
 
             var selectedDate = date ?? DateTime.Today;
@@ -225,7 +227,7 @@ namespace MediCare.Web.Controllers
         public async Task<IActionResult> ManageWorkingHours()
         {
             var user = await _userManager.GetUserAsync(User);
-            var doctor = user?.DoctorProfile;
+            var doctor = await _doctorRepository.GetDoctorByUserIdAsync(user!.Id);
             if (doctor is null) return Forbid();
 
             var workingHours = await _workingHoursService.GetByDoctorIdAsync(doctor.Id);

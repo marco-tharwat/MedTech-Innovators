@@ -9,5 +9,7 @@ namespace MediCare.Data.Repositories.Interfaces
         Task<IEnumerable<Doctor>> GetAvailableDoctorsAsync(DateTime date);
         Task<Doctor?> GetDoctorWithWorkingHoursAsync(int doctorId);
         Task<Doctor?> GetDoctorWithAppointmentsAsync(int doctorId);
+
+        Task<Doctor?> GetDoctorByUserIdAsync(string userId);
     }
 }

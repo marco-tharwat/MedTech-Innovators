@@ -20,7 +20,7 @@ namespace MediCare.Web.Controllers
         [HttpGet]
         public async Task<ActionResult> GetPatientHistory(int patientId)
         {
-            if (patientId <= 0) return BadRequest();
+            if (patientId <= 0) return BadRequest("The patient isn't in the database");
 
             var medicalHistory = await _medicalRecordService.GetPatientHistoryAsync(patientId);
 
@@ -34,6 +34,7 @@ namespace MediCare.Web.Controllers
             var medicalRecord = await _medicalRecordService.GetRecordDetailsAsync(medicalRecordId);
 
             if (medicalRecord == null) return NotFound("The medical record does not exist");
+            #region mapping
             var vm = new MedicalRecordDetailsViewModel
             {
                 PatientName = medicalRecord.Patient.User.FullName,
@@ -73,6 +74,7 @@ namespace MediCare.Web.Controllers
                     })
                     .ToList()
             };
+            #endregion
 
             return View("RecordDetails", vm);
         }

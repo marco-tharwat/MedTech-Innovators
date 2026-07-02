@@ -7,201 +7,115 @@
 <div class="container mt-4">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
+
         <h2>Medical Record Details</h2>
 
-        <a asp-controller="Prescription"
-           asp-action="AddMedication"
-           asp-route-medicalRecordId="@Model.MedicalRecordId"
-           class="btn btn-primary">
-            Add Medication
-        </a>
+        <div>
+
+            <a asp-controller="MedicalDocument"
+               asp-action="AddDocument"
+               asp-route-medicalRecordId="@Model.MedicalRecordId"
+               class="btn btn-success me-2">
+                Upload Document
+            </a>
+
+            <a asp-controller="Prescription"
+               asp-action="AddMedication"
+               asp-route-medicalRecordId="@Model.MedicalRecordId"
+               class="btn btn-primary">
+                Add Medication
+            </a>
+
+        </div>
+
     </div>
 
     <div class="row">
 
         <div class="col-lg-6 mb-4">
-
             <div class="card shadow-sm h-100">
-
-                <div class="card-header">
-                    <h5 class="mb-0">Patient Information</h5>
-                </div>
-
+                <div class="card-header"><h5 class="mb-0">Patient Information</h5></div>
                 <div class="card-body">
-
-                    <p>
-                        <strong>Name:</strong>
-                        @Model.PatientName
-                    </p>
-
-                    <p>
-                        <strong>Age:</strong>
-                        @Model.PatientAge
-                    </p>
-
-                    <p>
-                        <strong>Blood Type:</strong>
-                        @(string.IsNullOrWhiteSpace(Model.BloodType)
-                            ? "N/A"
-                            : Model.BloodType)
-                    </p>
-
-                    <p>
-                        <strong>Allergies:</strong>
-                        @(string.IsNullOrWhiteSpace(Model.Allergies)
-                            ? "None"
-                            : Model.Allergies)
-                    </p>
-
-                    <p class="mb-0">
-                        <strong>Emergency Contact:</strong>
-                        @(string.IsNullOrWhiteSpace(Model.EmergencyContact)
-                            ? "N/A"
-                            : Model.EmergencyContact)
-                    </p>
-
+                    <p><strong>Name:</strong> @Model.PatientName</p>
+                    <p><strong>Age:</strong> @Model.PatientAge</p>
+                    <p><strong>Blood Type:</strong> @(string.IsNullOrWhiteSpace(Model.BloodType) ? "N/A" : Model.BloodType)</p>
+                    <p><strong>Allergies:</strong> @(string.IsNullOrWhiteSpace(Model.Allergies) ? "None" : Model.Allergies)</p>
+                    <p class="mb-0"><strong>Emergency Contact:</strong> @(string.IsNullOrWhiteSpace(Model.EmergencyContact) ? "N/A" : Model.EmergencyContact)</p>
                 </div>
-
             </div>
-
         </div>
 
         <div class="col-lg-6 mb-4">
-
             <div class="card shadow-sm h-100">
-
-                <div class="card-header">
-                    <h5 class="mb-0">Doctor Information</h5>
-                </div>
-
+                <div class="card-header"><h5 class="mb-0">Doctor Information</h5></div>
                 <div class="card-body">
-
-                    <p>
-                        <strong>Doctor:</strong>
-                        @Model.DoctorName
-                    </p>
-
-                    <p>
-                        <strong>Specialization:</strong>
-                        @(string.IsNullOrWhiteSpace(Model.Specialization)
-                            ? "N/A"
-                            : Model.Specialization)
-                    </p>
-
-                    <p class="mb-0">
-                        <strong>Record Date:</strong>
-                        @Model.CreatedAt.ToString("dd MMM yyyy")
-                    </p>
-
+                    <p><strong>Doctor:</strong> @Model.DoctorName</p>
+                    <p><strong>Specialization:</strong> @(string.IsNullOrWhiteSpace(Model.Specialization) ? "N/A" : Model.Specialization)</p>
+                    <p class="mb-0"><strong>Record Date:</strong> @Model.CreatedAt.ToString("dd MMM yyyy")</p>
                 </div>
-
             </div>
-
         </div>
 
     </div>
 
     <div class="card shadow-sm mb-4">
-
-        <div class="card-header">
-            <h5 class="mb-0">Diagnosis</h5>
-        </div>
-
-        <div class="card-body">
-            @Model.Diagnosis
-        </div>
-
+        <div class="card-header"><h5 class="mb-0">Diagnosis</h5></div>
+        <div class="card-body">@Model.Diagnosis</div>
     </div>
 
     <div class="card shadow-sm mb-4">
-
-        <div class="card-header">
-            <h5 class="mb-0">Symptoms</h5>
-        </div>
-
+        <div class="card-header"><h5 class="mb-0">Symptoms</h5></div>
         <div class="card-body">
-
             @if (string.IsNullOrWhiteSpace(Model.Symptoms))
             {
-                <span class="text-muted">
-                    No symptoms recorded.
-                </span>
+                <span class="text-muted">No symptoms recorded.</span>
             }
             else
             {
                 @Model.Symptoms
             }
-
         </div>
-
     </div>
 
     <div class="card shadow-sm mb-4">
-
-        <div class="card-header">
-            <h5 class="mb-0">Treatment Plan</h5>
-        </div>
-
+        <div class="card-header"><h5 class="mb-0">Treatment Plan</h5></div>
         <div class="card-body">
-
             @if (string.IsNullOrWhiteSpace(Model.TreatmentPlan))
             {
-                <span class="text-muted">
-                    No treatment plan recorded.
-                </span>
+                <span class="text-muted">No treatment plan recorded.</span>
             }
             else
             {
                 @Model.TreatmentPlan
             }
-
         </div>
-
     </div>
 
     <div class="card shadow-sm mb-4">
-
-        <div class="card-header">
-            <h5 class="mb-0">Notes</h5>
-        </div>
-
+        <div class="card-header"><h5 class="mb-0">Notes</h5></div>
         <div class="card-body">
-
             @if (string.IsNullOrWhiteSpace(Model.Notes))
             {
-                <span class="text-muted">
-                    No notes recorded.
-                </span>
+                <span class="text-muted">No notes recorded.</span>
             }
             else
             {
                 @Model.Notes
             }
-
         </div>
-
     </div>
 
     <div class="card shadow-sm mb-4">
-
-        <div class="card-header">
-            <h5 class="mb-0">Medications</h5>
-        </div>
-
+        <div class="card-header"><h5 class="mb-0">Medications</h5></div>
         <div class="card-body">
-
             @if (!Model.Medications.Any())
             {
-                <div class="alert alert-info mb-0">
-                    No medications prescribed.
-                </div>
+                <div class="alert alert-info mb-0">No medications prescribed.</div>
             }
             else
             {
                 <div class="table-responsive">
-
                     <table class="table table-striped align-middle">
-
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -212,68 +126,30 @@
                                 <th></th>
                             </tr>
                         </thead>
-
                         <tbody>
-
                             @foreach (var medication in Model.Medications)
                             {
                                 <tr>
-
                                     <td>@medication.MedicationName</td>
-
                                     <td>@medication.Dosage</td>
-
                                     <td>@medication.Frequency</td>
-
+                                    <td>@(string.IsNullOrWhiteSpace(medication.Duration) ? "-" : medication.Duration)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(medication.Instructions) ? "-" : medication.Instructions)</td>
                                     <td>
-                                        @(string.IsNullOrWhiteSpace(medication.Duration)
-                                            ? "-"
-                                            : medication.Duration)
-                                    </td>
-
-                                    <td>
-                                        @(string.IsNullOrWhiteSpace(medication.Instructions)
-                                            ? "-"
-                                            : medication.Instructions)
-                                    </td>
-
-                                    <td>
-
-                                        <form asp-controller="Prescription"
-                                              asp-action="RemoveMedication"
-                                              method="post">
-
+                                        <form asp-controller="Prescription" asp-action="RemoveMedication" method="post">
                                             @Html.AntiForgeryToken()
-
-                                            <input type="hidden"
-                                                   name="medicalRecordId"
-                                                   value="@Model.MedicalRecordId" />
-
-                                            <input type="hidden"
-                                                   name="medicationId"
-                                                   value="@medication.Id" />
-
-                                            <button type="submit"
-                                                    class="btn btn-sm btn-danger">
-                                                Remove
-                                            </button>
-
+                                            <input type="hidden" name="medicalRecordId" value="@Model.MedicalRecordId" />
+                                            <input type="hidden" name="medicationId" value="@medication.Id" />
+                                            <button type="submit" class="btn btn-sm btn-danger">Remove</button>
                                         </form>
-
                                     </td>
-
                                 </tr>
                             }
-
                         </tbody>
-
                     </table>
-
                 </div>
             }
-
         </div>
-
     </div>
 
     <div class="card shadow-sm">
@@ -294,13 +170,14 @@
             {
                 <div class="table-responsive">
 
-                    <table class="table table-striped">
+                    <table class="table table-striped align-middle">
 
                         <thead>
                             <tr>
+                                <th>File Name</th>
                                 <th>Type</th>
-                                <th>Uploaded At</th>
-                                <th></th>
+                                <th>Uploaded</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
 
@@ -310,19 +187,39 @@
                             {
                                 <tr>
 
-                                    <td>@document.FileType</td>
+                                    <td>@document.OriginalFileName</td>
+
+                                    <td>@document.FileType.ToUpper()</td>
+
+                                    <td>@document.UploadedAt.ToString("dd MMM yyyy")</td>
 
                                     <td>
-                                        @document.UploadedAt.ToString("dd MMM yyyy")
-                                    </td>
 
-                                    <td>
-
-                                        <a href="@document.FilePath"
-                                           target="_blank"
+                                        <a asp-controller="MedicalDocument"
+                                           asp-action="DownloadDocument"
+                                           asp-route-documentId="@document.Id"
                                            class="btn btn-sm btn-outline-primary">
-                                            View
+                                            Download
                                         </a>
+
+                                        <form asp-controller="MedicalDocument"
+                                              asp-action="RemoveDocument"
+                                              method="post"
+                                              class="d-inline">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden"
+                                                   name="documentId"
+                                                   value="@document.Id" />
+
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-danger"
+                                                    onclick="return confirm('Delete this document?');">
+                                                Delete
+                                            </button>
+
+                                        </form>
 
                                     </td>
 

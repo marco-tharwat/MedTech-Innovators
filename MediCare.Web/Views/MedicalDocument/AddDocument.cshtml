@@ -1,0 +1,27 @@
+﻿@model MediCare.Web.ViewModels.MedicalDocumentUploadViewModel
+@{
+    ViewData["Title"] = "Upload Medical Document";
+}
+<h2>Upload Medical Document</h2>
+
+<form asp-action="AddDocument" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+
+    <input asp-for="MedicalRecordId" type="hidden" />
+
+    <div class="mb-3">
+        <label asp-for="Document" class="form-label">Choose File</label>
+        <input asp-for="Document" type="file" class="form-control" />
+        <span asp-validation-for="Document" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Upload</button>
+    <a asp-controller="MedicalRecord"
+       asp-action="GetRecordDetails"
+       asp-route-medicalRecordId="@Model.MedicalRecordId"
+       class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

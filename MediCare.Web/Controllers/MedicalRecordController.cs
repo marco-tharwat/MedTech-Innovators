@@ -2,6 +2,7 @@
 using MediCare.Data.Repositories.Interfaces;
 using MediCare.Services.Interfaces;
 using MediCare.Web.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -70,6 +71,7 @@ namespace MediCare.Web.Controllers
                         Id = d.Id,
                         FilePath = d.FilePath,
                         FileType = d.FileType,
+                        OriginalFileName = d.OriginalFileName,
                         UploadedAt = d.UploadedAt
                     })
                     .ToList()
@@ -79,6 +81,7 @@ namespace MediCare.Web.Controllers
             return View("RecordDetails", vm);
         }
         [HttpGet]
+        [Authorize(Roles = "Doctor, Admin")]
         public async Task<IActionResult> CreateMedicalRecord()
         {
             var patients = await unitOfWork.Patients.GetAllWithUsersAsync();
@@ -96,6 +99,7 @@ namespace MediCare.Web.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Doctor, Admin")]
         public async Task<ActionResult> CreateMedicalRecord(MedicalRecordViewModel viewModel)
         {
             if (ModelState.IsValid)

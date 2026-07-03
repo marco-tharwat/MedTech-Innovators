@@ -1,8 +1,69 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="public-hero py-5">
+    <div class="container py-4">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <span class="badge-status is-info mb-3">🩺 Trusted care, made simple</span>
+                <h1 class="display-5 fw-bold mb-3" style="color:var(--mc-teal-900);">
+                    Your health, organized in one place.
+                </h1>
+                <p class="fs-5 text-muted mb-4">
+                    MediCare connects patients and doctors — book appointments, manage your
+                    medical records, and stay on top of prescriptions, all from one simple dashboard.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a class="btn btn-primary btn-lg rounded-3 px-4" asp-controller="Doctor" asp-action="Index">Find a Doctor</a>
+                        <a class="btn btn-outline-primary btn-lg rounded-3 px-4" asp-controller="Appointment" asp-action="MyAppointments">My Appointments</a>
+                    }
+                    else
+                    {
+                        <a class="btn btn-primary btn-lg rounded-3 px-4" asp-controller="Account" asp-action="Register">Get Started</a>
+                        <a class="btn btn-outline-primary btn-lg rounded-3 px-4" asp-controller="Account" asp-action="Login">Login</a>
+                    }
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-4"
+                     style="width:100%;max-width:420px;aspect-ratio:1/1;background:linear-gradient(160deg, var(--mc-teal-100), #fff);font-size:8rem;">
+                    🩺
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold" style="color:var(--mc-teal-900);">Everything you need, in one dashboard</h2>
+        <p class="text-muted">Built for patients, doctors, and clinic admins alike.</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 p-4">
+                <div class="stat-icon mb-3">📅</div>
+                <h5 class="fw-bold mb-2">Book Appointments</h5>
+                <p class="text-muted mb-0">Find the right doctor and schedule a visit in just a few clicks.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 p-4">
+                <div class="stat-icon mb-3">📋</div>
+                <h5 class="fw-bold mb-2">Medical Records</h5>
+                <p class="text-muted mb-0">Keep a complete, secure history of visits, diagnoses, and treatment.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 p-4">
+                <div class="stat-icon mb-3">💊</div>
+                <h5 class="fw-bold mb-2">Prescriptions</h5>
+                <p class="text-muted mb-0">Doctors issue prescriptions that patients can review anytime.</p>
+            </div>
+        </div>
+    </div>
+</section>

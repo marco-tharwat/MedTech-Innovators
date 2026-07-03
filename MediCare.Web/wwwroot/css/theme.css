@@ -1,0 +1,346 @@
+/* ==========================================================================
+   MediCare Theme — soft/friendly healthcare palette (teal + green)
+   Loaded AFTER bootstrap.min.css. Overrides Bootstrap 5.3 CSS variables
+   and adds reusable component classes. No build step required.
+   ========================================================================== */
+
+:root,
+[data-bs-theme="light"] {
+  /* -- brand palette -- */
+  --mc-teal-900: #0f3d3a;
+  --mc-teal-800: #12514c;
+  --mc-teal-700: #146058;
+  --mc-teal-600: #0d9488;
+  --mc-teal-500: #14b8a6;
+  --mc-teal-400: #2dd4bf;
+  --mc-teal-100: #ccfbf1;
+  --mc-teal-50:  #f0fdfa;
+
+  --mc-green-500: #22c55e;
+  --mc-green-100: #dcfce7;
+
+  --mc-amber-500: #f59e0b;
+  --mc-amber-100: #fef3c7;
+
+  --mc-red-500: #ef4444;
+  --mc-red-100: #fee2e2;
+
+  --mc-ink: #0f2926;
+  --mc-muted: #5b7370;
+  --mc-bg: #f4faf9;
+  --mc-card-border: #e1efec;
+
+  /* -- remap Bootstrap theme colors so btn-primary / btn-success / text-primary etc.
+        automatically pick up the new palette everywhere with zero markup changes -- */
+  --bs-primary: var(--mc-teal-600);
+  --bs-primary-rgb: 13, 148, 136;
+  --bs-success: var(--mc-green-500);
+  --bs-success-rgb: 34, 197, 94;
+  --bs-warning: var(--mc-amber-500);
+  --bs-warning-rgb: 245, 158, 11;
+  --bs-danger: var(--mc-red-500);
+  --bs-danger-rgb: 239, 68, 68;
+  --bs-info: var(--mc-teal-400);
+  --bs-info-rgb: 45, 212, 191;
+  --bs-body-bg: var(--mc-bg);
+  --bs-body-color: var(--mc-ink);
+  --bs-link-color: var(--mc-teal-700);
+  --bs-link-hover-color: var(--mc-teal-800);
+  --bs-border-radius: 0.75rem;
+  --bs-border-radius-sm: 0.5rem;
+  --bs-border-radius-lg: 1rem;
+  --bs-border-radius-xl: 1.25rem;
+  --bs-font-sans-serif: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  background-color: var(--mc-bg);
+  color: var(--mc-ink);
+}
+
+a {
+  text-decoration: none;
+}
+
+/* Buttons: keep bootstrap's .btn-primary/.btn-success behavior but round + soften */
+.btn {
+  border-radius: var(--bs-border-radius-sm);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.btn-primary,
+.btn-success {
+  border: none;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.18);
+}
+.btn-outline-primary {
+  --bs-btn-color: var(--mc-teal-700);
+  --bs-btn-border-color: var(--mc-teal-500);
+  --bs-btn-hover-bg: var(--mc-teal-600);
+  --bs-btn-hover-border-color: var(--mc-teal-600);
+}
+
+/* Cards */
+.card {
+  border: 1px solid var(--mc-card-border);
+  border-radius: var(--bs-border-radius-lg);
+  box-shadow: 0 2px 10px rgba(15, 61, 58, 0.05);
+}
+
+/* Form controls */
+.form-control,
+.form-select {
+  border-radius: var(--bs-border-radius-sm);
+  border-color: var(--mc-card-border);
+}
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+  border-color: var(--mc-teal-500);
+  box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.15);
+}
+.form-check-input:checked {
+  background-color: var(--mc-teal-600);
+  border-color: var(--mc-teal-600);
+}
+.form-label {
+  font-weight: 600;
+  color: var(--mc-teal-900);
+  font-size: 0.9rem;
+}
+
+/* Tables */
+.table {
+  --bs-table-hover-bg: var(--mc-teal-50);
+}
+.table thead th {
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  color: var(--mc-muted);
+  border-bottom-width: 1px;
+  background-color: var(--mc-teal-50);
+}
+
+/* Status badges — used for appointment/prescription/record status pills */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35em 0.75em;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+.badge-status.is-success { background: var(--mc-green-100); color: #15803d; }
+.badge-status.is-pending { background: var(--mc-amber-100); color: #b45309; }
+.badge-status.is-danger  { background: var(--mc-red-100); color: #b91c1c; }
+.badge-status.is-info    { background: var(--mc-teal-100); color: var(--mc-teal-800); }
+.badge-status.is-muted   { background: #eef2f2; color: var(--mc-muted); }
+
+/* ==========================================================================
+   App shell: sidebar + topbar layout used by _AdminLayout
+   ========================================================================== */
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+}
+
+.app-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, var(--mc-teal-900) 0%, var(--mc-teal-800) 100%);
+  color: #eafaf7;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.2s ease;
+  z-index: 1030;
+}
+
+.app-sidebar .sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1.25rem 1.25rem;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.15rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.app-sidebar .sidebar-brand .brand-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--mc-teal-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.app-sidebar .sidebar-section-label {
+  padding: 1rem 1.25rem 0.35rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(234, 250, 247, 0.45);
+  font-weight: 700;
+}
+
+.app-sidebar .nav {
+  padding: 0 0.75rem;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.app-sidebar .nav-link {
+  color: rgba(234, 250, 247, 0.8);
+  border-radius: 0.6rem;
+  padding: 0.6rem 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+.app-sidebar .nav-link .nav-icon {
+  font-size: 1rem;
+  width: 1.25rem;
+  text-align: center;
+}
+.app-sidebar .nav-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+.app-sidebar .nav-link.active {
+  background: var(--mc-teal-500);
+  color: #05221f;
+  font-weight: 700;
+}
+
+.app-sidebar .sidebar-footer {
+  margin-top: auto;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.8rem;
+  color: rgba(234, 250, 247, 0.6);
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--mc-card-border);
+  padding: 0.85rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+}
+
+.app-topbar .topbar-toggle {
+  border: 1px solid var(--mc-card-border);
+  background: #fff;
+  border-radius: 0.5rem;
+  width: 38px;
+  height: 38px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-content {
+  padding: 1.75rem;
+  flex: 1;
+}
+
+.page-header {
+  margin-bottom: 1.5rem;
+}
+.page-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--mc-teal-900);
+  margin-bottom: 0.15rem;
+}
+.page-header p {
+  color: var(--mc-muted);
+  margin-bottom: 0;
+}
+
+/* Stat / summary cards for dashboards */
+.stat-card {
+  border-radius: var(--bs-border-radius-lg);
+  border: 1px solid var(--mc-card-border);
+  background: #fff;
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+.stat-card .stat-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  background: var(--mc-teal-100);
+  color: var(--mc-teal-700);
+  flex-shrink: 0;
+}
+.stat-card .stat-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--mc-teal-900);
+  line-height: 1.1;
+}
+.stat-card .stat-label {
+  color: var(--mc-muted);
+  font-size: 0.82rem;
+}
+
+/* Mobile: sidebar collapses off-canvas */
+@media (max-width: 991.98px) {
+  .app-sidebar {
+    position: fixed;
+    left: 0;
+    margin-left: -260px;
+  }
+  .app-sidebar.is-open {
+    margin-left: 0;
+    box-shadow: 0 0 0 100vmax rgba(15, 41, 38, 0.35);
+  }
+  .app-topbar .topbar-toggle {
+    display: inline-flex;
+  }
+}
+
+/* Public site (marketing) layout helpers */
+.public-navbar {
+  background: #fff;
+  border-bottom: 1px solid var(--mc-card-border);
+}
+.public-hero {
+  background: radial-gradient(circle at top right, var(--mc-teal-50), #fff 60%);
+}
+.footer-mc {
+  background: var(--mc-teal-900);
+  color: rgba(234, 250, 247, 0.75);
+}
+.footer-mc a {
+  color: #fff;
+}

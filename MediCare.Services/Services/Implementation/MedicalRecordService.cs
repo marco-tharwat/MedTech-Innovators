@@ -46,6 +46,23 @@ namespace MediCare.Services.Services.Implementation
             return await _unitOfWork.MedicalRecords.GetRecordsByPatientAsync(patientId);
         }
 
+        public async Task<IEnumerable<MedicalRecord>> GetPatientMedicalRecordsAsync(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId)) return Enumerable.Empty<MedicalRecord>();
+            var patient = await _unitOfWork.Patients.FirstOrDefaultAsync(p => p.UserId == userId);
+            if (patient == null) return Enumerable.Empty<MedicalRecord>();
+
+            var query = _unitOfWork.MedicalRecords.Query();
+
+            var records = await query.
+                Include(r => r.Doctor).ThenInclude(d => d.User).
+                Include(r => r.Medications).
+                Where(r => r.Patient.Id == patient.Id).
+                ToListAsync();
+
+            return records;
+        }
+
         public async Task<MedicalRecord?> GetRecordDetailsAsync(int recordId)
         {
             if (recordId <= 0) return null;

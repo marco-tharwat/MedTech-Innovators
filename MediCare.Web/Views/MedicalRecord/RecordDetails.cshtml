@@ -26,6 +26,13 @@
                 Add Medication
             </a>
 
+            <a asp-controller="Prescription"
+               asp-action="PrintPrescription"
+               asp-route-medicalRecordId="@Model.MedicalRecordId"
+               class="btn btn-outline-dark">
+                Print Prescription
+            </a>
+
         </div>
 
     </div>

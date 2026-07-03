@@ -4,12 +4,12 @@ using MediCare.Services.Interfaces;
 
 namespace MediCare.Services.Services.Implementation
 {
-    public class PrescriptionService : IPrescriptionService
+    public class MedicationService : IPrescriptionService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRepository<Medication> _medicationRepo;
 
-        public PrescriptionService(IUnitOfWork unitOfWork)
+        public MedicationService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _medicationRepo = unitOfWork.Repository<Medication>();

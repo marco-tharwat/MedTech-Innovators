@@ -24,27 +24,27 @@ namespace MediCare.Data.Repositories.Implementations
             return await _context.Set<T>().ToListAsync();
         }
 
-        public async Task<IEnumerable<T>> FindAsync(Func<T, bool> predicate)
+        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
         {
             return await Task.FromResult(_context.Set<T>().Where(predicate).AsEnumerable());
         }
 
-        public async Task<T?> FirstOrDefaultAsync(Func<T, bool> predicate)
+        public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
         {
             return await Task.FromResult(_context.Set<T>().FirstOrDefault(predicate));
         }
 
-        public async Task<bool> ExistsAsync(Func<T, bool> predicate)
+        public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
         {
             return await Task.FromResult(_context.Set<T>().Any(predicate));
         }
 
-        public async Task<int> CountAsync(Func<T, bool>? predicate = null)
+        public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null)
         {
             if (predicate == null)
-                return await Task.FromResult(_context.Set<T>().Count());
+                return await _context.Set<T>().CountAsync();
 
-            return await Task.FromResult(_context.Set<T>().Count(predicate));
+            return await _context.Set<T>().CountAsync(predicate);
         }
 
         public async Task AddAsync(T entity)

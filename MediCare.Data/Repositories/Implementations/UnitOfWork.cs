@@ -14,13 +14,19 @@ namespace MediCare.Data.Repositories.Implementations
         public IAppointmentRepository Appointments { get; }
         public IMedicalRecordRepository MedicalRecords { get; }
 
-        public UnitOfWork(MedContext context)
+        public UnitOfWork
+            (MedContext context,
+             IDoctorRepository doctorRepository,
+             IPatientRepository patientRepository,
+             IAppointmentRepository appointmentRepository,
+             IMedicalRecordRepository medicalRecordRepository
+            )
         {
             _context = context;
-            Doctors = new DoctorRepository(_context);
-            Patients = new PatientRepository(_context);
-            Appointments = new AppointmentRepository(_context);
-            MedicalRecords = new MedicalRecordRepository(_context);
+            Doctors = doctorRepository;
+            Patients = patientRepository;
+            Appointments = appointmentRepository;
+            MedicalRecords = medicalRecordRepository;
         }
 
         public IRepository<T> Repository<T>() where T : class

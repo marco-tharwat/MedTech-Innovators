@@ -7,10 +7,10 @@ namespace MediCare.Data.Repositories.Interfaces
         // Read 
         Task<T?> GetByIdAsync(int id);
         Task<IEnumerable<T>> GetAllAsync();
-        Task<IEnumerable<T>> FindAsync(Func<T, bool> predicate);
-        Task<T?> FirstOrDefaultAsync(Func<T, bool> predicate);
-        Task<bool> ExistsAsync(Func<T, bool> predicate);
-        Task<int> CountAsync(Func<T, bool>? predicate = null);
+        Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
+        Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
+        Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
+        Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null);
 
         // Write 
         Task AddAsync(T entity);

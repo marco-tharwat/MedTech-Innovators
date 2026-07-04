@@ -2,17 +2,14 @@
 using MediCare.Data.Repositories.Interfaces;
 using MediCare.Services.DTO;
 using MediCare.Services.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MediCare.Web.Controllers
 {
-    // Note: this controller was previously restricted to [Authorize(Roles = "Doctor")],
-    // which would block the doctor-listing/search feature it now hosts (meant to be
-    // browsed by patients, per the "Find Doctor" link in _AdminLayout's Patient section,
-    // and reasonably by anonymous visitors too). The restriction has been removed here;
-    // it was never protecting any implemented logic below since Index/Details were stubs.
+    [Authorize(Roles = "Doctor")]
     public class DoctorController : Controller
     {
         private readonly IDoctorService _doctorService;

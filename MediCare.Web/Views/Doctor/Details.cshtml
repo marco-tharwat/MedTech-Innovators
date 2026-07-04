@@ -1,0 +1,47 @@
+@using MediCare.Data.Models
+@model Doctor
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Dr. " + Model.User?.FullName;
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h2 class="fw-bold mb-1">Dr. @Model.User?.FullName</h2>
+                    <p class="text-muted mb-3">@Model.Specialization?.Name</p>
+
+                    <p class="mb-1"><strong>Location:</strong> @(Model.Location ?? "—")</p>
+                    <p class="mb-3"><strong>Consultation Fee:</strong> @Model.ConsultationFee.ToString("C")</p>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Bio))
+                    {
+                        <p class="mb-1"><strong>About</strong></p>
+                        <p class="text-muted">@Model.Bio</p>
+                    }
+
+                    @if (Model.WorkingHours.Any())
+                    {
+                        <h5 class="mt-4 mb-2">Working Hours</h5>
+                        <ul class="list-group list-group-flush mb-3">
+                            @foreach (var wh in Model.WorkingHours.OrderBy(w => w.DayOfWeek))
+                            {
+                                <li class="list-group-item">
+                                    @wh.DayOfWeek: @wh.StartTime.ToString(@"hh\:mm") - @wh.EndTime.ToString(@"hh\:mm")
+                                </li>
+                            }
+                        </ul>
+                    }
+
+                    <a asp-controller="Appointment" asp-action="Book" asp-route-doctorId="@Model.Id" class="btn btn-primary">Book Appointment</a>
+                    <a asp-action="Index" class="btn btn-secondary">Back</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

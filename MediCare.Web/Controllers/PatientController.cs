@@ -1,28 +1,88 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MediCare.Services.DTO;
+using MediCare.Services.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace MediCare.Web.Controllers
 {
     [Authorize(Roles = "Patient")]
     public class PatientController : Controller
     {
+        private readonly IPatientService _patientService;
+
+        public PatientController(IPatientService patientService)
+        {
+            _patientService = patientService;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> Profile()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var patient = await _patientService.GetProfileByUserIdAsync(userId!);
+            if (patient is null) return NotFound();
+
+            return View(patient);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> EditProfile()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var patient = await _patientService.GetProfileByUserIdAsync(userId!);
+            if (patient is null) return NotFound();
+
+            var model = new UpdatePatientProfileRequest
+            {
+                Name = patient.User?.FullName ?? string.Empty,
+                BirthDate = patient.BirthDate,
+                BloodType = patient.BloodType,
+                EmergencyContact = patient.EmergencyContact,
+                Allergies = patient.Allergies
+            };
+
+            return View("Edit", model);
+        }
+
+        // POST: PatientController/EditProfile
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> EditProfile(UpdatePatientProfileRequest request)
+        {
+            if (!ModelState.IsValid) return View("Edit", request);
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _patientService.UpdateProfileAsync(userId!, request);
+
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError("", result.ErrorMessage!);
+                return View("Edit", request);
+            }
+
+            TempData["Success"] = "Profile updated successfully.";
+            return RedirectToAction("Profile");
+        }
+
         // GET: PatientController
         public ActionResult Index()
         {
-            return View();
+            return RedirectToAction("Profile"); // Redirect to Patient Profile since Index page is not required
+            // return View();
         }
 
         // GET: PatientController/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            return View(); // view not implemented yet
         }
 
         // GET: PatientController/Create
         public ActionResult Create()
         {
-            return View();
+            return View(); // view not implemented yet
         }
 
         // POST: PatientController/Create

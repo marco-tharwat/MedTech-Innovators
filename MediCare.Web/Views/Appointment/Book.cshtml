@@ -2,6 +2,7 @@
 @model BookAppointmentViewModel
 
 @{
+    Layout = "_AdminLayout";
     var isReschedule = Model.AppointmentId.HasValue;
     ViewData["Title"] = isReschedule ? "Reschedule Appointment" : "Book Appointment";
 }

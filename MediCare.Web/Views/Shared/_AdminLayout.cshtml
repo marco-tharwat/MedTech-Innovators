@@ -3,126 +3,120 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - MediCare.Web</title>
+    <title>@ViewData["Title"] - MediCare</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/MediCare.Web.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MediCare.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+    <div class="app-shell">
+        <aside class="app-sidebar" id="appSidebar">
+            <a class="sidebar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                <span class="brand-mark">🩺</span>
+                <span>MediCare</span>
+            </a>
 
-                        @* Everyone sees Home *@
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
+            <nav class="nav">
+                <span class="sidebar-section-label">General</span>
+                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                    <span class="nav-icon">🏠</span> Home
+                </a>
 
-                        @* Admin Links *@
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Dashboard">Dashboard</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="ManageDoctors">Doctors</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="ManagePatients">Patients</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="AllAppointments">Appointments</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Specializations_">Specializations</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="AllRegistered">All Accounts</a>
-                            </li>
-                        }
+                @* Admin Links *@
+                @if (User.IsInRole("Admin"))
+                {
+                    <span class="sidebar-section-label">Administration</span>
+                    <a class="nav-link" asp-controller="Admin" asp-action="Dashboard">
+                        <span class="nav-icon">📊</span> Dashboard
+                    </a>
+                    <a class="nav-link" asp-controller="Admin" asp-action="ManageDoctors">
+                        <span class="nav-icon">🩺</span> Doctors
+                    </a>
+                    <a class="nav-link" asp-controller="Admin" asp-action="ManagePatients">
+                        <span class="nav-icon">🧑‍🤝‍🧑</span> Patients
+                    </a>
+                    <a class="nav-link" asp-controller="Admin" asp-action="AllAppointments">
+                        <span class="nav-icon">📅</span> Appointments
+                    </a>
+                    <a class="nav-link" asp-controller="Admin" asp-action="Specializations_">
+                        <span class="nav-icon">🏷️</span> Specializations
+                    </a>
+                    <a class="nav-link" asp-controller="Admin" asp-action="AllRegistered">
+                        <span class="nav-icon">👥</span> All Accounts
+                    </a>
+                }
 
-                        @* Doctor Links *@
-                        @if (User.IsInRole("Doctor"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Doctor" asp-action="Dashboard">My Dashboard</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Doctor" asp-action="Appointments">My Appointments</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Doctor" asp-action="Patients">My Patients</a>
-                            </li>
-                        }
+                @* Doctor Links *@
+                @if (User.IsInRole("Doctor"))
+                {
+                    <span class="sidebar-section-label">My Practice</span>
+                    <a class="nav-link" asp-controller="Doctor" asp-action="Dashboard">
+                        <span class="nav-icon">📊</span> My Dashboard
+                    </a>
+                    <a class="nav-link" asp-controller="Doctor" asp-action="Appointments">
+                        <span class="nav-icon">📅</span> My Appointments
+                    </a>
+                    <a class="nav-link" asp-controller="Doctor" asp-action="Patients">
+                        <span class="nav-icon">🧑‍🤝‍🧑</span> My Patients
+                    </a>
+                }
 
-                        @* Patient Links *@
-                        @if (User.IsInRole("Patient"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Doctor" asp-action="Index">Find Doctor</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Appointment" asp-action="MyAppointments">My Appointments</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="MedicalRecord" asp-action="MyRecords">My Records</a>
-                            </li>
-                        }
+                @* Patient Links *@
+                @if (User.IsInRole("Patient"))
+                {
+                    <span class="sidebar-section-label">My Care</span>
+                    <a class="nav-link" asp-controller="Doctor" asp-action="Index">
+                        <span class="nav-icon">🔎</span> Find Doctor
+                    </a>
+                    <a class="nav-link" asp-controller="Appointment" asp-action="MyAppointments">
+                        <span class="nav-icon">📅</span> My Appointments
+                    </a>
+                    <a class="nav-link" asp-controller="MedicalRecord" asp-action="MyRecords">
+                        <span class="nav-icon">📋</span> My Records
+                    </a>
+                }
+            </nav>
 
-                    </ul>
-
-                    @* Login / Logout / Notifications *@
-                    <ul class="navbar-nav">
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Notification" asp-action="Index">
-                                    🔔 Notifications
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <span class="nav-link text-dark">Hello, @User.Identity.Name</span>
-                            </li>
-                            <li class="nav-item">
-                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-link nav-link text-dark">Logout</button>
-                                </form>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Register</a>
-                            </li>
-                        }
-                    </ul>
-
-                </div>
+            <div class="sidebar-footer">
+                &copy; 2026 MediCare
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+        </aside>
+
+        <div class="app-main">
+            <header class="app-topbar">
+                <div class="d-flex align-items-center gap-2">
+                    <button class="topbar-toggle" type="button" id="sidebarToggle" aria-label="Toggle navigation">☰</button>
+                    <span class="fw-semibold text-muted d-none d-sm-inline">@ViewData["Title"]</span>
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a class="btn btn-light btn-sm border rounded-3" asp-controller="Notification" asp-action="Index">
+                            🔔 Notifications
+                        </a>
+                        <span class="text-muted d-none d-md-inline">Hello, <strong>@User.Identity.Name</strong></span>
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline m-0">
+                            <button type="submit" class="btn btn-outline-primary btn-sm rounded-3">Logout</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a class="btn btn-outline-primary btn-sm rounded-3" asp-controller="Account" asp-action="Login">Login</a>
+                        <a class="btn btn-primary btn-sm rounded-3" asp-controller="Account" asp-action="Register">Register</a>
+                    }
+                </div>
+            </header>
+
+            <main class="app-content" role="main">
+                @RenderBody()
+            </main>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - MediCare.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

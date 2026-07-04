@@ -30,9 +30,10 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IWorkingHoursService, WorkingHoursService>();
 builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
-builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();
+builder.Services.AddScoped<IPrescriptionService, MedicationService>();
 builder.Services.AddScoped<IAdminServices, AdminServices>();
-builder.Services.AddScoped<IMedicalDocumentService, MedicalDocumentService>();
+builder.Services.AddScoped<IDoctorService, DoctorService>();
+builder.Services.AddScoped<IPatientService, PatientService>();
 
 // Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()

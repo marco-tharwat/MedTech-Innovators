@@ -18,6 +18,7 @@ namespace MediCare.Web.Controllers
             _medicalRecordService = medicalRecordService;
         }
         [HttpGet]
+        [Authorize(Roles = "Doctor, Admin")]
         public IActionResult AddMedication(int medicalRecordId)
         {
             if (medicalRecordId <= 0) return BadRequest("Invalid medical recoed id");
@@ -29,6 +30,7 @@ namespace MediCare.Web.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Doctor, Admin")]
         public async Task<ActionResult> AddMedication(BulkPrescriptionViewModel viewModel)
         {
             if (!ModelState.IsValid) return View("AddMedication", viewModel);
@@ -60,6 +62,7 @@ namespace MediCare.Web.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Doctor, Admin")]
         public async Task<ActionResult> RemoveMedication(int medicalRecordId, int medicationId)
         {
             if (medicalRecordId <= 0 || medicationId <= 0) return BadRequest("Invalid Medical Record or Medication Id");

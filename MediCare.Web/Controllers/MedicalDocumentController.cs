@@ -28,6 +28,7 @@ namespace MediCare.Web.Controllers
             _webHost = webHost;
         }
         [HttpGet]
+        [Authorize(Roles = "Doctor, Admin")]
         public IActionResult AddDocument(int medicalRecordId)
         {
             return View(new MedicalDocumentUploadViewModel
@@ -93,6 +94,7 @@ namespace MediCare.Web.Controllers
             return RedirectToAction("GetRecordDetails", "MedicalRecord", new { medicalRecordId = viewModel.MedicalRecordId });
         }
         [HttpGet]
+        [Authorize(Roles = "Doctor, Admin, Patient")]
         public async Task<ActionResult> DownloadDocument(int documentId)
         {
             if (documentId <= 0) return BadRequest("Invalid data");

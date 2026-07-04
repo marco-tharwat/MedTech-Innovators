@@ -8,6 +8,7 @@ using System.Security.Claims;
 
 namespace MediCare.Web.Controllers
 {
+    [Authorize(Roles = "Doctor, Admin")]
     public class MedicalRecordController : Controller
     {
         private readonly IMedicalRecordService _medicalRecordService;
@@ -81,7 +82,6 @@ namespace MediCare.Web.Controllers
             return View("RecordDetails", vm);
         }
         [HttpGet]
-        [Authorize(Roles = "Doctor, Admin")]
         public async Task<IActionResult> CreateMedicalRecord()
         {
             var patients = await unitOfWork.Patients.GetAllWithUsersAsync();
@@ -99,7 +99,6 @@ namespace MediCare.Web.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Doctor, Admin")]
         public async Task<ActionResult> CreateMedicalRecord(MedicalRecordViewModel viewModel)
         {
             if (ModelState.IsValid)

@@ -1,0 +1,36 @@
+@using MediCare.Data.Models
+@model Patient
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-6">
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">@TempData["Success"]</div>
+            }
+
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h2 class="fw-bold mb-3">My Profile</h2>
+
+                    <p class="mb-1"><strong>Full Name:</strong> @Model.User?.FullName</p>
+                    <p class="mb-1"><strong>Email:</strong> @Model.User?.Email</p>
+                    <p class="mb-1"><strong>Birth Date:</strong> @Model.BirthDate.ToString("dd MMM yyyy")</p>
+                    <p class="mb-1"><strong>Age:</strong> @Model.Age</p>
+                    <p class="mb-1"><strong>Blood Type:</strong> @(Model.BloodType ?? "—")</p>
+                    <p class="mb-1"><strong>Emergency Contact:</strong> @(Model.EmergencyContact ?? "—")</p>
+                    <p class="mb-3"><strong>Allergies:</strong> @(Model.Allergies ?? "—")</p>
+
+                    <a asp-action="EditProfile" class="btn btn-primary">Edit Profile</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

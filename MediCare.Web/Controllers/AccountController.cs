@@ -103,6 +103,19 @@ public class AccountController : Controller
             if (flag)
             {
                 await _signInManager.SignInAsync(user, request.Rememberme);
+                var roles=await _userManager.GetRolesAsync(user);
+                if (roles.Contains("Admin"))
+                {
+                    return RedirectToAction("Dashboard", "Admin");
+                }
+                else if (roles.Contains("Doctor"))
+                {
+                    return RedirectToAction("Index", "Doctor");
+                }
+                else if (roles.Contains("Patient"))
+                {
+                    return RedirectToAction("Index", "Patient");
+                }
                 return RedirectToAction("Index", "Home");
             }
         }

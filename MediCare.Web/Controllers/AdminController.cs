@@ -11,16 +11,9 @@ namespace MediCare.Web.Controllers
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
-        readonly UserManager<ApplicationUser> _userManager;
-        readonly IUnitOfWork _unitOfWork;
         readonly IAdminServices _adminServices;
-        public AdminController(
-            UserManager<ApplicationUser> userManager,
-            IUnitOfWork unitOfWork, 
-            IAdminServices adminServices)
+        public AdminController(IAdminServices adminServices)
         {
-            _userManager = userManager;
-            _unitOfWork = unitOfWork;
             _adminServices = adminServices;
         }
 

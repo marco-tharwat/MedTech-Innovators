@@ -110,12 +110,13 @@ public class AccountController : Controller
         return View("Login");
     }
 
-    [HttpGet]
-    public async Task<ActionResult> Logout()
-    {
-        await _signInManager.SignOutAsync();
-        return RedirectToAction("Login");
-    }
+
+        [HttpPost]
+        public async Task<ActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login");
+        }
 
     public static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
     {

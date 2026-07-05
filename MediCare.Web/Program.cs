@@ -34,6 +34,8 @@ builder.Services.AddScoped<IPrescriptionService, MedicationService>();
 builder.Services.AddScoped<IAdminServices, AdminServices>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
 builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<IMedicalDocumentService, MedicalDocumentService>();
+
 
 // Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()

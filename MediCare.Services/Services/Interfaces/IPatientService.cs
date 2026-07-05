@@ -8,5 +8,6 @@ namespace MediCare.Services.Services.Interfaces
     {
         Task<Patient?> GetProfileByUserIdAsync(string userId);
         Task<ServiceResult> UpdateProfileAsync(string userId, UpdatePatientProfileRequest request);
+        Task<IEnumerable<Patient>> GetPatientsWithUsersAsync();
     }
 }

@@ -53,7 +53,9 @@ using (var scope = app.Services.CreateScope())
     var userManager = scope.ServiceProvider
         .GetRequiredService<UserManager<ApplicationUser>>();
 
-    await AccountController.SeedRolesAndAdminAccount(userManager,roleManager);
+    var dbContext = scope.ServiceProvider.GetRequiredService<MedContext>();
+
+    await AccountController.SeedRolesAndAdminAccountAndAllSpecializations(userManager,roleManager,dbContext);
 }
 
 if (!app.Environment.IsDevelopment())

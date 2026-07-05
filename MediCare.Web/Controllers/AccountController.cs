@@ -4,6 +4,7 @@ using MediCare.Web.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace MediCare.Web.Controllers;
 public class AccountController : Controller
@@ -131,8 +132,10 @@ public class AccountController : Controller
             return RedirectToAction("Login");
         }
 
-    public static async Task SeedRolesAndAdminAccount(UserManager<ApplicationUser> userManager,
-                                       RoleManager<IdentityRole> roleManager)
+    public static async Task SeedRolesAndAdminAccountAndAllSpecializations(
+        UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole> roleManager,
+        MedContext dbContext)
     {
         if (!await roleManager.RoleExistsAsync("Admin"))
             await roleManager.CreateAsync(new IdentityRole("Admin"));
@@ -155,5 +158,32 @@ public class AccountController : Controller
             if (result.Succeeded)
                 await userManager.AddToRoleAsync(admin, "Admin");
         }
+
+        //------------- add specializations -----------------------
+        var specializations = new[]
+        {
+            "General Practitioner",
+            "Cardiology",
+            "Dermatology",
+            "Pediatrics",
+            "Orthopedics",
+            "Neurology",
+            "Gynecology",
+            "Ophthalmology",
+            "ENT",
+            "Psychiatry",
+            "Dentistry",
+            "Internal Medicine"
+        };
+
+        foreach (var name in specializations)
+        {
+            if(!await dbContext.Specializations.AnyAsync(s => s.Name == name))
+            {
+                await dbContext.Specializations.AddAsync(new Specialization { Name = name });
+            }
+        }
+
+        await dbContext.SaveChangesAsync();
     }
 }

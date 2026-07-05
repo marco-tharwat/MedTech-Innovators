@@ -18,14 +18,14 @@ namespace MediCare.Web.Controllers
                 ".jpg"
             };
         private readonly IMedicalDocumentService _service;
-        private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHost;
+        private readonly IDoctorService _doctorService;
 
-        public MedicalDocumentController(IMedicalDocumentService service, IUnitOfWork unitOfWork, IWebHostEnvironment webHost)
+        public MedicalDocumentController(IMedicalDocumentService service, IUnitOfWork unitOfWork, IWebHostEnvironment webHost, IDoctorService doctorService)
         {
             _service = service;
-            _unitOfWork = unitOfWork;
             _webHost = webHost;
+            _doctorService = doctorService;
         }
         [HttpGet]
         [Authorize(Roles = "Doctor, Admin")]
@@ -44,7 +44,13 @@ namespace MediCare.Web.Controllers
             if (!ModelState.IsValid) return View(viewModel);
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var exists = await _unitOfWork.Doctors.ExistsAsync(d => d.UserId == userId);
+            if (string.IsNullOrEmpty(userId))
+            {
+                ModelState.AddModelError("", "An unexpected error occurred while identifying the doctor...");
+                return View(viewModel);
+            }
+
+            var exists = await _doctorService.ExistAsync(userId);
             if (!exists)
             {
                 ModelState.AddModelError("", "An unexpected error occurred while identifying the doctor...");

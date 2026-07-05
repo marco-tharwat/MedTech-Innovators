@@ -1,6 +1,6 @@
 ﻿using MediCare.Data.Models;
-using MediCare.Data.Repositories.Interfaces;
 using MediCare.Services.Interfaces;
+using MediCare.Services.Services.Interfaces;
 using MediCare.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,12 +12,14 @@ namespace MediCare.Web.Controllers
     public class MedicalRecordController : Controller
     {
         private readonly IMedicalRecordService _medicalRecordService;
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IPatientService _patientService;
+        private readonly IDoctorService _doctorService;
 
-        public MedicalRecordController(IMedicalRecordService medicalRecordService, IUnitOfWork unitOfWork)
+        public MedicalRecordController(IMedicalRecordService medicalRecordService, IPatientService patientService, IDoctorService doctorService)
         {
             _medicalRecordService = medicalRecordService;
-            this.unitOfWork = unitOfWork;
+            _patientService = patientService;
+            _doctorService = doctorService;
         }
         [HttpGet]
         public async Task<ActionResult> GetPatientHistory(int patientId)
@@ -84,7 +86,7 @@ namespace MediCare.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> CreateMedicalRecord()
         {
-            var patients = await unitOfWork.Patients.GetAllWithUsersAsync();
+            var patients = await _patientService.GetPatientsWithUsersAsync();
 
             var vm = new MedicalRecordViewModel
             {
@@ -105,11 +107,17 @@ namespace MediCare.Web.Controllers
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                var doctor = await unitOfWork.Doctors.FirstOrDefaultAsync(d => d.UserId == userId);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    ModelState.AddModelError("", "An unexpected error occurred while identifying the doctor...");
+                    return View(viewModel);
+                }
+
+                var doctor = await _doctorService.GetByUserIdAsync(userId);
                 if (doctor == null)
                 {
                     ModelState.AddModelError("", "An unexpected error occurred while identifying the doctor...");
-                    var patientsWithUsers = await unitOfWork.Patients.GetAllWithUsersAsync();
+                    var patientsWithUsers = await _patientService.GetPatientsWithUsersAsync();
 
                     viewModel.Patients = patientsWithUsers.Select(p => new PatientDropdownItem
                     {
@@ -134,7 +142,7 @@ namespace MediCare.Web.Controllers
                 if (success) return RedirectToAction("GetRecordDetails", new { medicalRecordId = medicalRecord.Id });
             }
             ModelState.AddModelError("", "An unexpected error occurred while saving...");
-            var patients = await unitOfWork.Patients.GetAllWithUsersAsync();
+            var patients = await _patientService.GetPatientsWithUsersAsync();
 
             viewModel.Patients = patients.Select(p => new PatientDropdownItem
             {

@@ -1,5 +1,6 @@
 ﻿using MediCare.Data.Models;
 using MediCare.Data.Repositories.Interfaces;
+using MediCare.Services.DTO;
 using MediCare.Web.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -7,20 +8,24 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace MediCare.Web.Controllers;
+
 public class AccountController : Controller
 {
     readonly UserManager<ApplicationUser> _userManager;
     readonly SignInManager<ApplicationUser> _signInManager;
     readonly IUnitOfWork _unitOfWork;
+    readonly IAccountRepositories _accountRepositories;
 
     public AccountController(
         UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager
-        , IUnitOfWork unitOfWork)
+        SignInManager<ApplicationUser> signInManager,
+        IUnitOfWork unitOfWork,
+        IAccountRepositories accountRepositories)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _unitOfWork = unitOfWork;
+        _accountRepositories = accountRepositories;
     }
 
     [HttpGet]
@@ -41,46 +46,21 @@ public class AccountController : Controller
         }
 
         ApplicationUser user = new ApplicationUser
-        { FullName = request.Name, Gender = request.Gender, Email = request.Email, UserName = request.UserName, Created = DateTime.Today };
+        {FullName = request.Name,Gender = request.Gender,Email = request.Email,UserName = request.UserName,Created = DateTime.Today};
 
-        var res = await _userManager.CreateAsync(user, request.Password);
+        var response = await _accountRepositories.SetNewAccount(user,request.Role,request.SpecializationId);
 
-        if (res.Succeeded)
+        if (response is null)
+            return RedirectToAction("Login");
+
+        foreach (var err in response)
         {
-            res=await _userManager.AddToRoleAsync(user, request.Role);
-
-            if (res.Succeeded)
-            {
-
-                if (request.Role == "Doctor")
-                {
-                    Doctor doctor = new();
-                    doctor.User = user;
-                    doctor.UserId = user.Id;
-                    doctor.IsApproved = false;
-                    doctor.SpecializationId = request.SpecializationId ?? 0;
-                    await _unitOfWork.Doctors.AddAsync(doctor);
-                }
-                else
-                {
-                    Patient patient = new Patient();
-                    patient.User = user;
-                    patient.UserId = user.Id;
-                    await _unitOfWork.Patients.AddAsync(patient);
-                }
-                await _unitOfWork.SaveChangesAsync();
-                return RedirectToAction("Login");
-            }
-        }
-
-        foreach (var error in res.Errors)
-        {
-            ModelState.AddModelError("", error.Description);
+            ModelState.AddModelError("", err);
         }
         var specs = await _unitOfWork.Repository<Specialization>().GetAllAsync();
         ViewBag.Specializations = new SelectList(specs, "Id", "Name");
         return View("Register", request);
-     }
+    }
 
     [HttpGet]
     public ActionResult Login()
@@ -104,7 +84,7 @@ public class AccountController : Controller
             if (flag)
             {
                 await _signInManager.SignInAsync(user, request.Rememberme);
-                var roles=await _userManager.GetRolesAsync(user);
+                var roles = await _userManager.GetRolesAsync(user);
                 if (roles.Contains("Admin"))
                 {
                     return RedirectToAction("Dashboard", "Admin");
@@ -125,7 +105,7 @@ public class AccountController : Controller
     }
 
 
-        [HttpPost]
+    [HttpPost]
         public async Task<ActionResult> Logout()
         {
             await _signInManager.SignOutAsync();

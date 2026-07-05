@@ -22,7 +22,17 @@ builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IMedicalRecordRepository, MedicalRecordRepository>();
+builder.Services.AddScoped<IAccountRepositories, AccountRepositories>();
 
+<<<<<<< HEAD
+=======
+//Services
+builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
+builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();
+builder.Services.AddScoped<IAdminServices, AdminServices>();
+builder.Services.AddScoped<IAccountServices, AccountServices>();
+
+>>>>>>> seif
 // Unit of Work
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 

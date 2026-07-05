@@ -42,12 +42,16 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 
 var app = builder.Build();
 
-// Seed Roles
+// Seed Roles & Admin Account
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider
         .GetRequiredService<RoleManager<IdentityRole>>();
-    await AccountController.SeedRoles(roleManager);
+
+    var userManager = scope.ServiceProvider
+        .GetRequiredService<UserManager<ApplicationUser>>();
+
+    await AccountController.SeedRolesAndAdminAccount(userManager,roleManager);
 }
 
 if (!app.Environment.IsDevelopment())

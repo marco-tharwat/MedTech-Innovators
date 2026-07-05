@@ -131,7 +131,8 @@ public class AccountController : Controller
             return RedirectToAction("Login");
         }
 
-    public static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
+    public static async Task SeedRolesAndAdminAccount(UserManager<ApplicationUser> userManager,
+                                       RoleManager<IdentityRole> roleManager)
     {
         if (!await roleManager.RoleExistsAsync("Admin"))
             await roleManager.CreateAsync(new IdentityRole("Admin"));
@@ -141,5 +142,18 @@ public class AccountController : Controller
 
         if (!await roleManager.RoleExistsAsync("Patient"))
             await roleManager.CreateAsync(new IdentityRole("Patient"));
+
+        //------------- add an admin account for testing ------------
+
+        var adminUsername = "admin";
+        var adminPassword = "Admin@123";
+        if (await userManager.FindByNameAsync(adminUsername) is null)
+        {
+            var admin = new ApplicationUser 
+            { UserName = adminUsername, EmailConfirmed=true, FullName="Administrator" };
+            var result = await userManager.CreateAsync(admin,adminPassword);
+            if (result.Succeeded)
+                await userManager.AddToRoleAsync(admin, "Admin");
+        }
     }
 }

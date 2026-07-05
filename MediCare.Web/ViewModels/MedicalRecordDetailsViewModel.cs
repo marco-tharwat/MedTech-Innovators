@@ -9,6 +9,7 @@
         public string? Allergies { get; set; }
         public string? EmergencyContact { get; set; }
         public int MedicalRecordId { get; set; }
+        public int PatientId { get; set; }
 
         // Doctor Information
         public string DoctorName { get; set; } = string.Empty;

@@ -12,6 +12,12 @@
         <h2>Medical Record Details</h2>
 
         <div>
+            <a asp-controller="MedicalRecord"
+                asp-action="GetPatientHistory"
+                asp-route-patientId="@Model.PatientId"
+                class="btn btn-info me-2">
+                Patient History
+            </a>
 
             <a asp-controller="MedicalDocument"
                asp-action="AddDocument"

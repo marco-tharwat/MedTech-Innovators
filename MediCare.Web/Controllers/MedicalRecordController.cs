@@ -49,7 +49,7 @@ namespace MediCare.Web.Controllers
                 MedicalRecordId = medicalRecord.Id,
                 DoctorName = medicalRecord.Doctor.User.FullName,
                 Specialization = medicalRecord.Doctor.Specialization?.Name,
-
+                PatientId = medicalRecord.PatientId,
                 CreatedAt = medicalRecord.CreatedAt,
                 Diagnosis = medicalRecord.Diagnosis,
                 Symptoms = medicalRecord.Symptoms,

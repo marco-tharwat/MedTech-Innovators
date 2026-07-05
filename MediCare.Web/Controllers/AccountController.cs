@@ -48,9 +48,10 @@ public class AccountController : Controller
         ApplicationUser user = new ApplicationUser
         {FullName = request.Name,Gender = request.Gender,Email = request.Email,UserName = request.UserName,Created = DateTime.Today};
 
-        var response = await _accountRepositories.SetNewAccount(user,request.Role,request.SpecializationId);
+        var response = await _accountRepositories
+            .SetNewAccount(user,request.Role,request.SpecializationId,request.Password);
 
-        if (response is null)
+        if (response is null ||response.Count()==0)
             return RedirectToAction("Login");
 
         foreach (var err in response)
@@ -100,7 +101,7 @@ public class AccountController : Controller
                 return RedirectToAction("Index", "Home");
             }
         }
-        ModelState.AddModelError("", "the password or UserName is incorrect!!!");
+        ModelState.AddModelError("", "the password!");
         return View("Login");
     }
 

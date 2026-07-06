@@ -99,6 +99,16 @@ namespace MediCare.Services.Services
             return true;
         }
 
+        public async Task<bool> DeletePatient(int id)
+        {
+            var patient = await _unitOfWork.Patients.GetByIdAsync(id);
+            if (patient is null) return false;
+            _unitOfWork.Patients.Remove(patient);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
+
+
         public async Task<Specialization?> GetSpecialization(int id)
         {
             var res = await _unitOfWork.Repository<Specialization>()

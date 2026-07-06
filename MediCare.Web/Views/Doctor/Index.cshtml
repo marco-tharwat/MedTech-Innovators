@@ -31,7 +31,12 @@
                 </div>
             </form>
 
-            @if (!Model.Doctors.Any())
+            @*
+                Model.Doctors is Empty All the time while the Doctors Database has records for Doctors users, and they are valid for login
+                Problem Might be from the _doctorService.SearchAsync() => the returned List is Empty
+            *@
+
+            @if (!Model.Doctors.Any()) 
             {
                 <div class="card shadow-sm border-0 rounded-4">
                     <div class="p-5 text-center text-muted">

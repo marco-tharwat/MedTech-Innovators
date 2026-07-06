@@ -36,9 +36,15 @@
                             }
                         </ul>
                     }
+                    @if (Model.IsApproved) {
+                        <p class="text-success">Doctor is Approved by Admin</p>
+                    }
+                    else {
+                        <p class="text-danger">Doctor is not Approved by Admin yet</p>
+                    }
 
                     <a asp-controller="Appointment" asp-action="Book" asp-route-doctorId="@Model.Id" class="btn btn-primary">Book Appointment</a>
-                    <a asp-action="Index" class="btn btn-secondary">Back</a>
+                    <a asp-action="ManageDoctors" asp-controller="Admin" class="btn btn-secondary">Back</a>
                 </div>
             </div>
 

@@ -1,4 +1,4 @@
-﻿using MediCare.Data.Models;
+using MediCare.Data.Models;
 using MediCare.Data.Repositories.Interfaces;
 using MediCare.Services.DTO;
 using MediCare.Services.Services.Interfaces;
@@ -36,9 +36,20 @@ namespace MediCare.Web.Controllers
             _userManager = userManager;
         }
 
+        // GET: DoctorController/Index — the logged-in doctor's home dashboard.
+        // Pure landing page (quick-action hub) linking only to actions the doctor
+        // actually has: DoctorDailyList, ManageWorkingHours, CreateMedicalRecord,
+        // Notifications and the public doctor Filter/search. No new business logic.
+        [Authorize(Roles = "Doctor")]
+        [HttpGet]
+        public IActionResult Index()
+        {
+            return View();
+        }
+
         // GET: DoctorController
         [HttpGet]
-        public async Task<ActionResult> Index(DoctorSearchDTO filter)
+        public async Task<ActionResult> Filter(DoctorSearchDTO filter)
         {
             filter ??= new DoctorSearchDTO();
 

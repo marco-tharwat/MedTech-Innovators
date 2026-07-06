@@ -44,7 +44,12 @@
                     }
 
                     <a asp-controller="Appointment" asp-action="Book" asp-route-doctorId="@Model.Id" class="btn btn-primary">Book Appointment</a>
-                    <a asp-action="ManageDoctors" asp-controller="Admin" class="btn btn-secondary">Back</a>
+                    @if (User.IsInRole("Patient") || (User.IsInRole("Doctor"))) {
+                        <a asp-action="Filter" asp-controller="Doctor" class="btn btn-secondary">Back</a>
+                    }
+                    else if ((User.IsInRole("Admin"))) {
+                        <a asp-action="ManageDoctors" asp-controller="Admin" class="btn btn-secondary">Back</a>
+                    }
                 </div>
             </div>
 

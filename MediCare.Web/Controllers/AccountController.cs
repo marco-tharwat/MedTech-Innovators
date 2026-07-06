@@ -1,4 +1,4 @@
-﻿using MediCare.Data.Models;
+using MediCare.Data.Models;
 using MediCare.Data.Repositories.Interfaces;
 using MediCare.Web.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -101,6 +101,15 @@ namespace MediCare.Web.Controllers
                 if (flag)
                 {
                     await _signInManager.SignInAsync(user, request.Rememberme);
+
+                    // Land each role on its own home/dashboard.
+                    if (await _userManager.IsInRoleAsync(user, "Admin"))
+                        return RedirectToAction("Dashboard", "Admin");
+                    if (await _userManager.IsInRoleAsync(user, "Doctor"))
+                        return RedirectToAction("Index", "Doctor");
+                    if (await _userManager.IsInRoleAsync(user, "Patient"))
+                        return RedirectToAction("Index", "Patient");
+
                     return RedirectToAction("Index", "Home");
                 }
             }

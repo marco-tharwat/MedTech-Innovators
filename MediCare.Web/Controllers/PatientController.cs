@@ -1,4 +1,4 @@
-﻿using MediCare.Data.Models;
+using MediCare.Data.Models;
 using MediCare.Data.Repositories.Interfaces;
 using MediCare.Services.DTO;
 using MediCare.Services.Services.Interfaces;
@@ -94,10 +94,17 @@ namespace MediCare.Web.Controllers
             return RedirectToAction("Profile");
         }
 
-        // GET: PatientController
-        public ActionResult Index()
+        // GET: PatientController/Index — the logged-in patient's home dashboard.
+        // Landing page (quick-action hub) linking only to real patient actions:
+        // Find a Doctor, PatientAppointments, Profile and Notifications. Loads the
+        // patient's own profile via the existing service so the header can greet
+        // them and surface profile completeness; no new business logic.
+        [Authorize(Roles = "Patient")]
+        public async Task<ActionResult> Index()
         {
-            return View();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var patient = await _patientService.GetProfileByUserIdAsync(userId!);
+            return View(patient);
         }
 
         // GET: PatientController/Details/5 — admin viewing any patient's record
@@ -158,7 +165,7 @@ namespace MediCare.Web.Controllers
                 await _unitOfWork.Patients.AddAsync(patient);
                 await _unitOfWork.SaveChangesAsync();
 
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("ManagePatients", "Admin");
             }
 
             foreach (var error in res.Errors)
@@ -229,7 +236,7 @@ namespace MediCare.Web.Controllers
         public async Task<ActionResult> DeleteConfirmed(int id)
         {
             await _adminServices.DeletePatient(id);
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("ManagePatients", "Admin");
         }
     }
 }

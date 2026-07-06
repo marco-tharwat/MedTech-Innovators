@@ -1,0 +1,81 @@
+@using MediCare.Data.Models
+@model Patient
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "My Dashboard";
+    var name = Model?.User?.FullName ?? User.Identity?.Name;
+}
+
+<div class="page-header d-flex flex-wrap justify-content-between align-items-end gap-2">
+    <div>
+        <h1>Hello, @name 👋</h1>
+        <p>Manage your appointments, records and profile — all in one place.</p>
+    </div>
+    <a asp-controller="Doctor" asp-action="Filter" class="btn btn-primary">
+        📅 Book an Appointment
+    </a>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@* Icon are Disables because of a Frontend Bug on hovering (no time to fix it because it may change the whole frontend archeticture) *@
+@* and it is not neccessary, just icons *@
+
+<div class="row g-4">
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a asp-controller="Doctor" asp-action="Filter" class="card h-100 p-4 text-decoration-none text-reset quick-action">
+            @* <div class="stat-icon mb-3">🔎</div> *@
+            <h5 class="fw-bold mb-1">Find a Doctor</h5>
+            <p class="text-muted mb-0">Search by name, specialization or location and book an appointment.</p>
+        </a>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a asp-controller="Appointment" asp-action="PatientAppointments" class="card h-100 p-4 text-decoration-none text-reset quick-action">
+            @* <div class="stat-icon mb-3">📅</div> *@
+            <h5 class="fw-bold mb-1">My Appointments</h5>
+            <p class="text-muted mb-0">View upcoming visits, reschedule or cancel a booking.</p>
+        </a>
+    </div>
+
+    @if (Model != null)
+    {
+        <div class="col-12 col-sm-6 col-lg-4">
+            <a asp-controller="MedicalRecord" asp-action="GetPatientHistory" asp-route-patientId="@Model.Id"
+               class="card h-100 p-4 text-decoration-none text-reset quick-action">
+                @* <div class="stat-icon mb-3">📋</div> *@
+                <h5 class="fw-bold mb-1">My Medical Records</h5>
+                <p class="text-muted mb-0">Review your visit history, diagnoses and prescribed medications.</p>
+            </a>
+        </div>
+    }
+
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a asp-controller="Patient" asp-action="Profile" class="card h-100 p-4 text-decoration-none text-reset quick-action">
+            @* <div class="stat-icon mb-3">👤</div> *@
+            <h5 class="fw-bold mb-1">My Profile</h5>
+            <p class="text-muted mb-0">Keep your personal details, blood type and allergies up to date.</p>
+        </a>
+    </div>
+</div>
+
+@if (Model != null && (string.IsNullOrWhiteSpace(Model.BloodType) || string.IsNullOrWhiteSpace(Model.EmergencyContact)))
+{
+    <div class="card mt-4 p-4 border-0" style="background: var(--mc-amber-100);">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div>
+                <h6 class="fw-bold mb-1">Complete your profile</h6>
+                <p class="mb-0 text-muted">Add your blood type and emergency contact so doctors have what they need in an emergency.</p>
+            </div>
+            <a asp-controller="Patient" asp-action="EditProfile" class="btn btn-primary">Update Profile</a>
+        </div>
+    </div>
+}

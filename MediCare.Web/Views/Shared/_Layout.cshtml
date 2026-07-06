@@ -38,6 +38,12 @@
                             <li class="nav-item">
                                 <a class="btn btn-primary btn-sm rounded-3 ms-2" asp-controller="Notification" asp-action="Index">🔔 Notifications</a>
                             </li>
+                            <li>
+                                <span class="text-muted d-none d-md-inline" style="padding: 15px;">Hello, <strong>@User.Identity.Name</strong></span>
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline m-0">
+                                    <button type="submit" class="btn btn-outline-primary btn-sm rounded-3">Logout</button>
+                                </form>
+                            </li>
                         }
                         else
                         {

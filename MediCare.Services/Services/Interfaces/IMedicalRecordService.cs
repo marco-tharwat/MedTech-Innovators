@@ -7,5 +7,6 @@ namespace MediCare.Services.Interfaces
         Task<MedicalRecord?> GetRecordDetailsAsync(int recordId);
         Task<IEnumerable<MedicalRecord>> GetPatientHistoryAsync(int patientId);
         Task<bool> CreateMedicalRecordAsync(MedicalRecord record);
+        Task<IEnumerable<MedicalRecord>> GetPatientMedicalRecordsAsync(string userId);
     }
 }

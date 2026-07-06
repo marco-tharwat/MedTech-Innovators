@@ -1,6 +1,6 @@
 ﻿using MediCare.Data.Models.Enum;
 
-namespace MediCare.Web.ViewModels
+namespace MediCare.Services.DTO
 {
     public class RegisterRequest
     {

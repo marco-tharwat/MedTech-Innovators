@@ -67,5 +67,15 @@ namespace MediCare.Services.Services.Implementation
                 .Include(d => d.WorkingHours)
                 .FirstOrDefaultAsync(d => d.Id == id);
         }
+
+        public async Task<Doctor?> GetByUserIdAsync(string userId)
+        {
+            return await _unitOfWork.Doctors.GetDoctorByUserIdAsync(userId);
+        }
+
+        public async Task<bool> ExistAsync(string userId)
+        {
+            return await _unitOfWork.Doctors.ExistsAsync(d => d.UserId == userId);
+        }
     }
 }

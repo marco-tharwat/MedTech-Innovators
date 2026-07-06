@@ -15,6 +15,11 @@ namespace MediCare.Services.Services.Implementation
             _unitOfWork = unitOfWork;
         }
 
+        public async Task<IEnumerable<Patient>> GetPatientsWithUsersAsync()
+        {
+            return await _unitOfWork.Patients.GetAllWithUsersAsync();
+        }
+
         public async Task<Patient?> GetProfileByUserIdAsync(string userId)
         {
             return await _unitOfWork.Patients.GetPatientByUserIdAsync(userId);

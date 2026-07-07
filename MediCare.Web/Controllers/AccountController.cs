@@ -1,4 +1,5 @@
 using MediCare.Data.Models;
+using MediCare.Data.Repositories.Implementations;
 using MediCare.Data.Repositories.Interfaces;
 using MediCare.Web.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -12,15 +13,18 @@ namespace MediCare.Web.Controllers
         readonly UserManager<ApplicationUser> _userManager;
         readonly SignInManager<ApplicationUser> _signInManager;
         readonly IUnitOfWork _unitOfWork;
+        readonly IAccountRepositories _accountRepositories;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager
-            , IUnitOfWork unitOfWork)
+            SignInManager<ApplicationUser> signInManager,
+            IUnitOfWork unitOfWork,
+            IAccountRepositories accountRepositories)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _unitOfWork = unitOfWork;
+            _accountRepositories = accountRepositories;
         }
 
         [HttpGet]
@@ -43,36 +47,15 @@ namespace MediCare.Web.Controllers
             ApplicationUser user = new ApplicationUser
             { FullName = request.Name, Gender = request.Gender, Email = request.Email, UserName = request.UserName, Created = DateTime.Today };
 
-            var res = await _userManager.CreateAsync(user, request.Password);
+            var response = await _accountRepositories
+                .SetNewAccount(user, request.Role, request.SpecializationId, request.Password);
 
-            await _userManager.AddToRoleAsync(user, request.Role);
-
-            if (res.Succeeded)
-            {
-
-                if (request.Role == "Doctor")
-                {
-                    Doctor doctor = new();
-                    doctor.User = user;
-                    doctor.UserId = user.Id;
-                    doctor.IsApproved = false;
-                    doctor.SpecializationId = request.SpecializationId ?? 0;
-                    await _unitOfWork.Doctors.AddAsync(doctor);
-                }
-                else
-                {
-                    Patient patient = new Patient();
-                    patient.User = user;
-                    patient.UserId = user.Id;
-                    await _unitOfWork.Patients.AddAsync(patient);
-                }
-                await _unitOfWork.SaveChangesAsync();
+            if (response is null || response.Count() == 0)
                 return RedirectToAction("Login");
-            }
 
-            foreach (var error in res.Errors)
+            foreach (var err in response)
             {
-                ModelState.AddModelError("", error.Description);
+                ModelState.AddModelError("", err);
             }
             var specs = await _unitOfWork.Repository<Specialization>().GetAllAsync();
             ViewBag.Specializations = new SelectList(specs, "Id", "Name");
@@ -101,19 +84,23 @@ namespace MediCare.Web.Controllers
                 if (flag)
                 {
                     await _signInManager.SignInAsync(user, request.Rememberme);
-
-                    // Land each role on its own home/dashboard.
-                    if (await _userManager.IsInRoleAsync(user, "Admin"))
+                    var roles = await _userManager.GetRolesAsync(user);
+                    if (roles.Contains("Admin"))
+                    {
                         return RedirectToAction("Dashboard", "Admin");
-                    if (await _userManager.IsInRoleAsync(user, "Doctor"))
+                    }
+                    else if (roles.Contains("Doctor"))
+                    {
                         return RedirectToAction("Index", "Doctor");
-                    if (await _userManager.IsInRoleAsync(user, "Patient"))
+                    }
+                    else if (roles.Contains("Patient"))
+                    {
                         return RedirectToAction("Index", "Patient");
-
+                    }
                     return RedirectToAction("Index", "Home");
                 }
             }
-            ModelState.AddModelError("", "the password or UserName is incorrect!!!");
+            ModelState.AddModelError("", "the password!");
             return View("Login");
         }
 

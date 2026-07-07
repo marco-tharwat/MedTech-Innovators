@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="~/MediCare.Web.styles.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <header>
         <nav class="navbar navbar-expand-sm navbar-light public-navbar mb-0 py-3">
             <div class="container">
@@ -60,7 +60,7 @@
         </nav>
     </header>
 
-    <main role="main">
+    <main role="main" class="flex-grow-1">
         @RenderBody()
     </main>
 

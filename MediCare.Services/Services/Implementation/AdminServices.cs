@@ -1,4 +1,4 @@
-﻿using MediCare.Data.Models;
+using MediCare.Data.Models;
 using MediCare.Data.Models.Enum;
 using MediCare.Data.Repositories.Interfaces;
 using MediCare.Services.DTO;
@@ -94,18 +94,71 @@ namespace MediCare.Services.Services
         {
             var doctor = await _unitOfWork.Doctors.GetByIdAsync(id);
             if (doctor is null) return false;
-            _unitOfWork.Doctors.Remove(doctor);
-            await _unitOfWork.SaveChangesAsync();
-            return true;
+
+            // A Doctor account is an ApplicationUser + a Doctor profile created together
+            // (see AccountController.Register / DoctorController.Create). Deleting must mirror
+            // that: remove the profile and the Identity user in one atomic transaction, so the
+            // user can no longer log in once the Doctor is gone.
+            await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                _unitOfWork.Doctors.Remove(doctor);
+                await _unitOfWork.SaveChangesAsync();
+
+                if (!await DeleteIdentityUserAsync(doctor.UserId))
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return false;
+                }
+
+                await _unitOfWork.CommitTransactionAsync();
+                return true;
+            }
+            catch
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                return false;
+            }
         }
 
         public async Task<bool> DeletePatient(int id)
         {
             var patient = await _unitOfWork.Patients.GetByIdAsync(id);
             if (patient is null) return false;
-            _unitOfWork.Patients.Remove(patient);
-            await _unitOfWork.SaveChangesAsync();
-            return true;
+
+            // Mirror the creation flow (ApplicationUser + Patient profile) on delete: remove the
+            // profile and its Identity user together so the account cannot outlive the patient.
+            await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                _unitOfWork.Patients.Remove(patient);
+                await _unitOfWork.SaveChangesAsync();
+
+                if (!await DeleteIdentityUserAsync(patient.UserId))
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return false;
+                }
+
+                await _unitOfWork.CommitTransactionAsync();
+                return true;
+            }
+            catch
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                return false;
+            }
+        }
+
+        // Removes the backing Identity user through the same UserManager that created it.
+        // Returns true when there is nothing to delete or the delete succeeds.
+        private async Task<bool> DeleteIdentityUserAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null) return true;
+
+            var result = await _userManager.DeleteAsync(user);
+            return result.Succeeded;
         }
 
 

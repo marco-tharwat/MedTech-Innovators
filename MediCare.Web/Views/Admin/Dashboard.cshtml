@@ -1,4 +1,4 @@
-﻿@using MediCare.Services.DTO
+@using MediCare.Services.DTO
 @model SummaryOfDataForAdmin
 
 @{
@@ -6,64 +6,94 @@
     ViewData["Title"] = "Admin Dashboard";
 }
 
-<h2>Admin Dashboard</h2>
+<div class="page-header">
+    <h1>Admin Dashboard</h1>
+    <p>An overview of the clinic's doctors, patients and appointments.</p>
+</div>
 
-<div class="row mt-4">
-    <div class="col-md-4">
-        <div class="card text-white bg-primary mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Doctors</h5>
-                <h2>@Model.TotalNumberOfDoctors</h2>
-                <p class="mb-1">@Model.DoctorsPending pending approval</p>
-                <a asp-action="ManageDoctors" class="btn btn-light btn-sm mt-2">Manage</a>
+@* Icon are Disables because of a Frontend Bug on hovering (no time to fix it because it may change the whole frontend archeticture) *@
+@* and it is not neccessary, just icons *@
+
+<div class="row g-4 mb-2">
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon">🩺</div>
+            <div>
+                <div class="stat-value">@Model.TotalNumberOfDoctors</div>
+                <div class="stat-label">Doctors · @Model.DoctorsPending pending</div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-success mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Patients</h5>
-                <h2>@Model.TotalNumberOfPatients</h2>
-                <p class="mb-1">Registered patients</p>
-                <a asp-action="ManagePatients" class="btn btn-light btn-sm mt-2">Manage</a>
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="stat-card">
+            @* <div class="stat-icon">🧑‍🤝‍🧑</div> *@
+            <div>
+                <div class="stat-value">@Model.TotalNumberOfPatients</div>
+                <div class="stat-label">Registered patients</div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-warning mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Appointments</h5>
-                <h2>@Model.NumOfAppointments</h2>
-                <p class="mb-1">@Model.NumOfAppointmentsScheduledForToday scheduled for today</p>
-                <a asp-action="AllAppointments" class="btn btn-light btn-sm mt-2">View All</a>
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="stat-card">
+            @* <div class="stat-icon">📅</div> *@
+            <div>
+                <div class="stat-value">@Model.NumOfAppointments</div>
+                <div class="stat-label">Total appointments</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="stat-card">
+            @* <div class="stat-icon">📆</div> *@
+            <div>
+                <div class="stat-value">@Model.NumOfAppointmentsScheduledForToday</div>
+                <div class="stat-label">Scheduled today</div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row mt-3">
-    <div class="col-md-3">
-        <div class="card text-white bg-info mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Specializations</h5>
-                <a asp-action="Specializations_" class="btn btn-light btn-sm">Manage</a>
-            </div>
-        </div>
+<div class="row g-4 mt-1">
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a asp-action="ManageDoctors" class="card h-100 p-4 text-decoration-none text-reset quick-action">
+            @* <div class="stat-icon mb-3">🩺</div> *@
+            <h5 class="fw-bold mb-1">Manage Doctors</h5>
+            <p class="text-muted mb-0">Add, edit, approve or remove doctor accounts.</p>
+        </a>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-danger mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Reports</h5>
-                <a asp-action="Reports" class="btn btn-light btn-sm">View Reports</a>
-            </div>
-        </div>
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a asp-action="ManagePatients" class="card h-100 p-4 text-decoration-none text-reset quick-action">
+            @* <div class="stat-icon mb-3">🧑‍🤝‍🧑</div> *@
+            <h5 class="fw-bold mb-1">Manage Patients</h5>
+            <p class="text-muted mb-0">View and update registered patient records.</p>
+        </a>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-dark mb-3">
-            <div class="card-body">
-                <h5 class="card-title">All Accounts</h5>
-                <a asp-action="AllRegistered" class="btn btn-light btn-sm">View All Users</a>
-            </div>
-        </div>
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a asp-action="AllAppointments" class="card h-100 p-4 text-decoration-none text-reset quick-action">
+            @* <div class="stat-icon mb-3">📅</div> *@
+            <h5 class="fw-bold mb-1">Appointments</h5>
+            <p class="text-muted mb-0">Browse and update every appointment in the clinic.</p>
+        </a>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a asp-action="Specializations_" class="card h-100 p-4 text-decoration-none text-reset quick-action">
+            @* <div class="stat-icon mb-3">🏷️</div> *@
+            <h5 class="fw-bold mb-1">Specializations</h5>
+            <p class="text-muted mb-0">Manage the specializations doctors can belong to.</p>
+        </a>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a asp-action="Reports" class="card h-100 p-4 text-decoration-none text-reset quick-action">
+            @* <div class="stat-icon mb-3">📈</div> *@
+            <h5 class="fw-bold mb-1">Reports</h5>
+            <p class="text-muted mb-0">Review clinic activity and summary reports.</p>
+        </a>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a asp-action="AllRegistered" class="card h-100 p-4 text-decoration-none text-reset quick-action">
+            @* <div class="stat-icon mb-3">👥</div> *@
+            <h5 class="fw-bold mb-1">All Accounts</h5>
+            <p class="text-muted mb-0">See every registered user account in one place.</p>
+        </a>
     </div>
 </div>

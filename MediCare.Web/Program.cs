@@ -26,7 +26,6 @@ builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IMedicalRecordRepository, MedicalRecordRepository>();
 builder.Services.AddScoped<IAccountRepositories, AccountRepositories>();
 
-
 // Unit of Work
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -51,18 +50,40 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 
 var app = builder.Build();
 
-// Seed Roles & Admin Account
+// Seed Roles and Admin User
 using (var scope = app.Services.CreateScope())
 {
-    var roleManager = scope.ServiceProvider
-        .GetRequiredService<RoleManager<IdentityRole>>();
+    var services = scope.ServiceProvider;
 
-    var userManager = scope.ServiceProvider
-        .GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
-    var dbContext = scope.ServiceProvider.GetRequiredService<MedContext>();
+    // Seed roles
+    await AccountController.SeedRoles(roleManager);
 
-    await AccountController.SeedRolesAndAdminAccountAndAllSpecializations(userManager,roleManager,dbContext);
+    // Seed admin user
+    var admin = await userManager.FindByNameAsync("admin");
+
+    if (admin == null)
+    {
+        admin = new ApplicationUser
+        {
+            UserName = "admin",
+            Email = "admin@admin.com",
+            FullName = "Administrator",
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(admin, "Admin@123");
+
+        if (!result.Succeeded)
+        {
+            throw new Exception(string.Join(Environment.NewLine,
+                result.Errors.Select(e => e.Description)));
+        }
+
+        await userManager.AddToRoleAsync(admin, "Admin");
+    }
 }
 
 if (!app.Environment.IsDevelopment())
@@ -72,6 +93,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
 
 app.UseAuthentication();

@@ -16,6 +16,8 @@ namespace MediCare.Services.Services.Interfaces
 
         Task<bool> DeleteDoctor(int id);
 
+        Task<bool> DeletePatient(int id);
+
         Task<Specialization?> GetSpecialization(int id);
 
         Task<IEnumerable<SpecializationSetup>?> GetSpecializationSetupAsync();

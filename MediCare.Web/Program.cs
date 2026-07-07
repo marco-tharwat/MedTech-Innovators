@@ -8,6 +8,8 @@ using MediCare.Services.Services.Interfaces;
 using MediCare.Web.Controllers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MediCare.Services.Factory;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,7 +40,9 @@ builder.Services.AddScoped<IDoctorService, DoctorService>();
 builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<IMedicalDocumentService, MedicalDocumentService>();
 builder.Services.AddScoped<IAccountServices, AccountServices>();
+// factory
 
+builder.Services.AddScoped<AppointmentFactory>();
 
 // Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()

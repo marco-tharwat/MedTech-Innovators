@@ -47,7 +47,6 @@ namespace MediCare.Web.Controllers
             return View();
         }
 
-        // GET: DoctorController
         [HttpGet]
         public async Task<ActionResult> Filter(DoctorSearchDTO filter)
         {

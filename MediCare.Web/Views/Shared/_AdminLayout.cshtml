@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -44,6 +44,9 @@
                     <a class="nav-link" asp-controller="Admin" asp-action="Specializations_">
                         <span class="nav-icon">🏷️</span> Specializations
                     </a>
+                    <a class="nav-link" asp-controller="Admin" asp-action="Reports">
+                        <span class="nav-icon">📈</span> Reports
+                    </a>
                     <a class="nav-link" asp-controller="Admin" asp-action="AllRegistered">
                         <span class="nav-icon">👥</span> All Accounts
                     </a>
@@ -53,14 +56,20 @@
                 @if (User.IsInRole("Doctor"))
                 {
                     <span class="sidebar-section-label">My Practice</span>
-                    <a class="nav-link" asp-controller="Doctor" asp-action="Dashboard">
+                    <a class="nav-link" asp-controller="Doctor" asp-action="Index">
                         <span class="nav-icon">📊</span> My Dashboard
                     </a>
-                    <a class="nav-link" asp-controller="Doctor" asp-action="Appointments">
-                        <span class="nav-icon">📅</span> My Appointments
+                    <a class="nav-link" asp-controller="Appointment" asp-action="DoctorDailyList">
+                        <span class="nav-icon">📅</span> Daily Appointments
                     </a>
-                    <a class="nav-link" asp-controller="Doctor" asp-action="Patients">
-                        <span class="nav-icon">🧑‍🤝‍🧑</span> My Patients
+                    <a class="nav-link" asp-controller="Appointment" asp-action="ManageWorkingHours">
+                        <span class="nav-icon">🕒</span> Working Hours
+                    </a>
+                    <a class="nav-link" asp-controller="MedicalRecord" asp-action="CreateMedicalRecord">
+                        <span class="nav-icon">📝</span> New Medical Record
+                    </a>
+                    <a class="nav-link" asp-controller="Doctor" asp-action="Filter">
+                        <span class="nav-icon">🔎</span> Doctor Directory
                     </a>
                 }
 
@@ -68,14 +77,17 @@
                 @if (User.IsInRole("Patient"))
                 {
                     <span class="sidebar-section-label">My Care</span>
-                    <a class="nav-link" asp-controller="Doctor" asp-action="Index">
-                        <span class="nav-icon">🔎</span> Find Doctor
+                    <a class="nav-link" asp-controller="Patient" asp-action="Index">
+                        <span class="nav-icon">📊</span> My Dashboard
                     </a>
-                    <a class="nav-link" asp-controller="Appointment" asp-action="MyAppointments">
+                    <a class="nav-link" asp-controller="Doctor" asp-action="Filter">
+                        <span class="nav-icon">🔎</span> Find a Doctor
+                    </a>
+                    <a class="nav-link" asp-controller="Appointment" asp-action="PatientAppointments">
                         <span class="nav-icon">📅</span> My Appointments
                     </a>
-                    <a class="nav-link" asp-controller="MedicalRecord" asp-action="MyRecords">
-                        <span class="nav-icon">📋</span> My Records
+                    <a class="nav-link" asp-controller="Patient" asp-action="Profile">
+                        <span class="nav-icon">👤</span> My Profile
                     </a>
                 }
             </nav>

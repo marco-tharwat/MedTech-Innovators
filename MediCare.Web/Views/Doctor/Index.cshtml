@@ -1,64 +1,61 @@
-@using MediCare.Services.DTO
-@model DoctorSearchDTO
-
 @{
     Layout = "_AdminLayout";
-    ViewData["Title"] = "Find a Doctor";
+    ViewData["Title"] = "Doctor Dashboard";
+    var name = User.Identity?.Name;
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-10">
+<div class="page-header d-flex flex-wrap justify-content-between align-items-end gap-2">
+    <div>
+        <h1>Welcome back, Dr. @name 👋</h1>
+        <p>Here's everything you need to manage your practice today.</p>
+    </div>
+    <a asp-controller="Appointment" asp-action="DoctorDailyList" class="btn btn-primary">
+        📅 Today's Appointments
+    </a>
+</div>
 
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="fw-bold mb-0">Find a Doctor</h2>
-            </div>
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
 
-            <form method="get" asp-action="Index" class="row g-2 mb-4">
-                <div class="col-md-4">
-                    <input type="text" name="SearchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Search by name or specialization" />
-                </div>
-                <div class="col-md-3">
-                    <select name="SpecializationId" class="form-select" asp-items="ViewBag.Specializations">
-                        <option value="">All Specializations</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <input type="text" name="Location" value="@Model.Location" class="form-control" placeholder="Location" />
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Search</button>
-                </div>
-            </form>
+@* Icon are Disables because of a Frontend Bug on hovering (no time to fix it because it may change the whole frontend archeticture) *@
+@* and it is not neccessary, just icons *@
 
-            @if (!Model.Doctors.Any())
-            {
-                <div class="card shadow-sm border-0 rounded-4">
-                    <div class="p-5 text-center text-muted">
-                        No doctors found matching your search.
-                    </div>
-                </div>
-            }
-            else
-            {
-                <div class="row g-4">
-                    @foreach (var doctor in Model.Doctors)
-                    {
-                        <div class="col-12 col-md-6 col-lg-4">
-                            <div class="card shadow-sm border-0 rounded-4 h-100">
-                                <div class="card-body">
-                                    <h5 class="card-title fw-bold mb-1">Dr. @doctor.User?.FullName</h5>
-                                    <p class="text-muted mb-2">@doctor.Specialization?.Name</p>
-                                    <p class="mb-1"><strong>Location:</strong> @(doctor.Location ?? "—")</p>
-                                    <p class="mb-3"><strong>Consultation Fee:</strong> @doctor.ConsultationFee.ToString("C")</p>
-                                    <a asp-action="Details" asp-route-id="@doctor.Id" class="btn btn-outline-primary btn-sm">View Profile</a>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </div>
-            }
+<div class="row g-4">
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a asp-controller="Appointment" asp-action="DoctorDailyList" class="card h-100 p-4 text-decoration-none text-reset quick-action">
+            @* <div class="stat-icon mb-3">📅</div> *@
+            <h5 class="fw-bold mb-1">Daily Appointments</h5>
+            <p class="text-muted mb-0">Review, approve or reject the appointments booked with you for any day.</p>
+        </a>
+    </div>
 
-        </div>
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a asp-controller="Appointment" asp-action="ManageWorkingHours" class="card h-100 p-4 text-decoration-none text-reset quick-action">
+            @* <div class="stat-icon mb-3">🕒</div> *@
+            <h5 class="fw-bold mb-1">Working Hours</h5>
+            <p class="text-muted mb-0">Set the days and times you're available so patients can book valid slots.</p>
+        </a>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a asp-controller="MedicalRecord" asp-action="CreateMedicalRecord" class="card h-100 p-4 text-decoration-none text-reset quick-action">
+            @* <div class="stat-icon mb-3">📝</div> *@
+            <h5 class="fw-bold mb-1">New Medical Record</h5>
+            <p class="text-muted mb-0">Document a diagnosis, symptoms and treatment plan for one of your patients.</p>
+        </a>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a asp-controller="Doctor" asp-action="Filter" class="card h-100 p-4 text-decoration-none text-reset quick-action">
+            @* <div class="stat-icon mb-3">🔎</div> *@
+            <h5 class="fw-bold mb-1">Doctor Directory</h5>
+            <p class="text-muted mb-0">Browse the clinic's doctors and specializations.</p>
+        </a>
     </div>
 </div>

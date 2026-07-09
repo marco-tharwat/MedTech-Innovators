@@ -1,4 +1,4 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
+// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
 // for details on configuring this project to bundle and minify static web assets.
 
 // Mobile sidebar toggle (dashboard layout)
@@ -19,10 +19,21 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Highlight the sidebar link matching the current URL
+    var current = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
     var links = document.querySelectorAll('.app-sidebar .nav-link');
+    var bestLink = null;
+    var bestLen = -1;
     links.forEach(function (link) {
-        if (link.getAttribute('href') === window.location.pathname) {
-            link.classList.add('active');
+        var href = (link.getAttribute('href') || '').split('?')[0].replace(/\/+$/, '').toLowerCase();
+        if (!href) return;
+        // Exact match wins; otherwise pick the longest href that prefixes the path.
+        if (current === href) {
+            if (href.length > bestLen) { bestLink = link; bestLen = href.length + 1000; }
+        } else if (href !== '/' && current.indexOf(href + '/') === 0 && href.length > bestLen) {
+            bestLink = link; bestLen = href.length;
         }
     });
+    if (bestLink) {
+        bestLink.classList.add('active');
+    }
 });

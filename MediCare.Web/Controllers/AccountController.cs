@@ -1,26 +1,31 @@
-﻿using MediCare.Data.Models;
+using MediCare.Data.Models;
+using MediCare.Data.Repositories.Implementations;
 using MediCare.Data.Repositories.Interfaces;
 using MediCare.Web.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace MediCare.Web.Controllers;
-public class AccountController : Controller
+namespace MediCare.Web.Controllers
 {
-    readonly UserManager<ApplicationUser> _userManager;
-    readonly SignInManager<ApplicationUser> _signInManager;
-    readonly IUnitOfWork _unitOfWork;
-
-    public AccountController(
-        UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager
-        , IUnitOfWork unitOfWork)
+    public class AccountController : Controller
     {
-        _userManager = userManager;
-        _signInManager = signInManager;
-        _unitOfWork = unitOfWork;
-    }
+        readonly UserManager<ApplicationUser> _userManager;
+        readonly SignInManager<ApplicationUser> _signInManager;
+        readonly IUnitOfWork _unitOfWork;
+        readonly IAccountRepositories _accountRepositories;
+
+        public AccountController(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            IUnitOfWork unitOfWork,
+            IAccountRepositories accountRepositories)
+        {
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _unitOfWork = unitOfWork;
+            _accountRepositories = accountRepositories;
+        }
 
     [HttpGet]
     public async Task<ActionResult> Register()
@@ -42,44 +47,20 @@ public class AccountController : Controller
         ApplicationUser user = new ApplicationUser
         { FullName = request.Name, Gender = request.Gender, Email = request.Email, UserName = request.UserName, Created = DateTime.Today };
 
-        var res = await _userManager.CreateAsync(user, request.Password);
+            var response = await _accountRepositories
+                .SetNewAccount(user, request.Role, request.SpecializationId, request.Password);
 
-        if (res.Succeeded)
-        {
-            res=await _userManager.AddToRoleAsync(user, request.Role);
-
-            if (res.Succeeded)
-            {
-
-                if (request.Role == "Doctor")
-                {
-                    Doctor doctor = new();
-                    doctor.User = user;
-                    doctor.UserId = user.Id;
-                    doctor.IsApproved = false;
-                    doctor.SpecializationId = request.SpecializationId ?? 0;
-                    await _unitOfWork.Doctors.AddAsync(doctor);
-                }
-                else
-                {
-                    Patient patient = new Patient();
-                    patient.User = user;
-                    patient.UserId = user.Id;
-                    await _unitOfWork.Patients.AddAsync(patient);
-                }
-                await _unitOfWork.SaveChangesAsync();
+            if (response is null || response.Count() == 0)
                 return RedirectToAction("Login");
-            }
-        }
 
-        foreach (var error in res.Errors)
-        {
-            ModelState.AddModelError("", error.Description);
+            foreach (var err in response)
+            {
+                ModelState.AddModelError("", err);
+            }
+            var specs = await _unitOfWork.Repository<Specialization>().GetAllAsync();
+            ViewBag.Specializations = new SelectList(specs, "Id", "Name");
+            return View("Register", request);
         }
-        var specs = await _unitOfWork.Repository<Specialization>().GetAllAsync();
-        ViewBag.Specializations = new SelectList(specs, "Id", "Name");
-        return View("Register", request);
-     }
 
     [HttpGet]
     public ActionResult Login()
@@ -87,42 +68,41 @@ public class AccountController : Controller
         return View("Login");
     }
 
-    [HttpPost]
-    public async Task<ActionResult> Login(LoginRequest request)
-    {
-        if (ModelState.IsValid)
+        [HttpPost]
+        public async Task<ActionResult> Login(LoginRequest request)
         {
-            if (request is null) return View("Login");
-            var user = await _userManager.FindByNameAsync(request.UserName);
-            if (user is null)
+            if (ModelState.IsValid)
             {
-                ModelState.AddModelError("", "UserName is incorrect!");
-                return View("Login");
+                if (request is null) return View("Login");
+                var user = await _userManager.FindByNameAsync(request.UserName);
+                if (user is null)
+                {
+                    ModelState.AddModelError("", "UserName is incorrect!");
+                    return View("Login");
+                }
+                var flag = await _userManager.CheckPasswordAsync(user, request.Password);
+                if (flag)
+                {
+                    await _signInManager.SignInAsync(user, request.Rememberme);
+                    var roles = await _userManager.GetRolesAsync(user);
+                    if (roles.Contains("Admin"))
+                    {
+                        return RedirectToAction("Dashboard", "Admin");
+                    }
+                    else if (roles.Contains("Doctor"))
+                    {
+                        return RedirectToAction("Index", "Doctor");
+                    }
+                    else if (roles.Contains("Patient"))
+                    {
+                        return RedirectToAction("Index", "Patient");
+                    }
+                    return RedirectToAction("Index", "Home");
+                }
             }
-            var flag = await _userManager.CheckPasswordAsync(user, request.Password);
-            if (flag)
-            {
-                await _signInManager.SignInAsync(user, request.Rememberme);
-                var roles=await _userManager.GetRolesAsync(user);
-                if (roles.Contains("Admin"))
-                {
-                    return RedirectToAction("Dashboard", "Admin");
-                }
-                else if (roles.Contains("Doctor"))
-                {
-                    return RedirectToAction("Index", "Doctor");
-                }
-                else if (roles.Contains("Patient"))
-                {
-                    return RedirectToAction("Index", "Patient");
-                }
-                return RedirectToAction("Index", "Home");
-            }
+            ModelState.AddModelError("", "the password!");
+            return View("Login");
         }
-        ModelState.AddModelError("", "the password or UserName is incorrect!!!");
-        return View("Login");
-    }
-
 
         [HttpPost]
         public async Task<ActionResult> Logout()

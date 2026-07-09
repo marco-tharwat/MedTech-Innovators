@@ -8,7 +8,10 @@
     ViewData["Title"] = "Manage Doctors";
 }
 
-<h2>Manage Doctors</h2>
+<div class="d-flex justify-content-between align-items-center">
+    <h2>Manage Doctors</h2>
+    <a asp-controller="Doctor" asp-action="Create" class="btn btn-primary">Add Doctor</a>
+</div>
 
 <table class="table table-striped">
     <thead>
@@ -41,6 +44,8 @@
                 </td>
                 <td>
                     <a asp-action="UpdateDoctor" asp-route-id="@doctor.Id" asp-route-specID="@doctor.SpecializationId" class="btn btn-sm btn-primary">Edit</a>
+                    <a asp-controller="Doctor" asp-action="Details" asp-route-id="@doctor.Id" class="btn btn-sm btn-outline-secondary">Details</a>
+                    <a asp-controller="Doctor" asp-action="Delete" asp-route-id="@doctor.Id" class="btn btn-sm btn-danger">Delete</a>
                 </td>
             </tr>
         }

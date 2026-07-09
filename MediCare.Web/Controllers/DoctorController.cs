@@ -1,34 +1,62 @@
-﻿using MediCare.Data.Models;
+using MediCare.Data.Models;
 using MediCare.Data.Repositories.Interfaces;
 using MediCare.Services.DTO;
 using MediCare.Services.Services.Interfaces;
+using MediCare.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MediCare.Web.Controllers
 {
-    [Authorize(Roles = "Doctor")]
+    // Note: this controller was previously restricted to [Authorize(Roles = "Doctor")],
+    // which would block the doctor-listing/search feature it now hosts (meant to be
+    // browsed by patients, per the "Find Doctor" link in _AdminLayout's Patient section,
+    // and reasonably by anonymous visitors too). The restriction has been removed here;
+    // it was never protecting any implemented logic below since Index/Details were stubs.
+    // Create/Edit/Delete are doctor-management actions (same responsibility as
+    // AdminController's UpdateDoctor/DeleteDoctor) and are protected individually below.
     public class DoctorController : Controller
     {
         private readonly IDoctorService _doctorService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IAdminServices _adminServices;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public DoctorController(IDoctorService doctorService, IUnitOfWork unitOfWork)
+        public DoctorController(
+            IDoctorService doctorService,
+            IUnitOfWork unitOfWork,
+            IAdminServices adminServices,
+            UserManager<ApplicationUser> userManager)
         {
             _doctorService = doctorService;
             _unitOfWork = unitOfWork;
+            _adminServices = adminServices;
+            _userManager = userManager;
         }
 
-        // GET: DoctorController
+        // GET: DoctorController/Index — the logged-in doctor's home dashboard.
+        // Pure landing page (quick-action hub) linking only to actions the doctor
+        // actually has: DoctorDailyList, ManageWorkingHours, CreateMedicalRecord,
+        // Notifications and the public doctor Filter/search. No new business logic.
+        [Authorize(Roles = "Doctor")]
         [HttpGet]
-        public async Task<ActionResult> Index(DoctorSearchDTO filter)
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> Filter(DoctorSearchDTO filter)
         {
             filter ??= new DoctorSearchDTO();
 
             var results = await _doctorService.SearchAsync(filter.SearchTerm, filter.SpecializationId, filter.Location);
-            filter.Doctors = results.ToList();
+
+            // Excpects a list of doctors that matches with SearchTerm, Specialization and Location inside results
+
+            filter.Doctors = results.ToList(); // This list is saved her in "filter" and will be passed to Views/Doctor/Index 
 
             var specializations = await _unitOfWork.Repository<Specialization>().GetAllAsync();
             ViewBag.Specializations = new SelectList(specializations, "Id", "Name", filter.SpecializationId);
@@ -46,66 +74,129 @@ namespace MediCare.Web.Controllers
         }
 
         // GET: DoctorController/Create
-        public ActionResult Create()
+        // Mirrors AccountController.Register's Doctor branch: a Doctor account is an
+        // ApplicationUser + a Doctor profile created together. Extra profile fields
+        // (fee, bio, location) are populated afterwards via Edit, exactly like the
+        // public registration flow leaves them for the admin to fill in via UpdateDoctor.
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<ActionResult> Create()
         {
+            var specs = await _unitOfWork.Repository<Specialization>().GetAllAsync();
+            ViewBag.Specializations = new SelectList(specs, "Id", "Name");
             return View();
         }
 
         // POST: DoctorController/Create
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<ActionResult> Create(RegisterRequest request)
         {
-            try
+            request.Role = "Doctor";
+
+            if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                var specs = await _unitOfWork.Repository<Specialization>().GetAllAsync();
+                ViewBag.Specializations = new SelectList(specs, "Id", "Name", request.SpecializationId);
+                return View(request);
             }
-            catch
+
+            var user = new ApplicationUser
             {
-                return View();
+                FullName = request.Name,
+                Gender = request.Gender,
+                Email = request.Email,
+                UserName = request.UserName,
+                Created = DateTime.Today
+            };
+
+            var res = await _userManager.CreateAsync(user, request.Password);
+
+            if (res.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(user, "Doctor");
+
+                var doctor = new Doctor
+                {
+                    User = user,
+                    UserId = user.Id,
+                    IsApproved = false,
+                    SpecializationId = request.SpecializationId ?? 0
+                };
+                await _unitOfWork.Doctors.AddAsync(doctor);
+                await _unitOfWork.SaveChangesAsync();
+
+                return RedirectToAction("ManageDoctors", "Admin");
             }
+
+            foreach (var error in res.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
+            var specializations = await _unitOfWork.Repository<Specialization>().GetAllAsync();
+            ViewBag.Specializations = new SelectList(specializations, "Id", "Name", request.SpecializationId);
+            return View(request);
         }
 
         // GET: DoctorController/Edit/5
-        public ActionResult Edit(int id)
+        // Reuses the existing AdminServices mapping/update logic (same one AdminController's
+        // UpdateDoctor action uses), just exposed here without the specialization-browsing
+        // redirect context.
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<ActionResult> Edit(int id)
         {
-            return View();
+            var model = await _adminServices.mapFromDoctorToUpdateDoctorRequest(id);
+            if (model is null) return NotFound();
+
+            var specs = await _unitOfWork.Repository<Specialization>().GetAllAsync();
+            ViewBag.Specializations = new SelectList(specs, "Id", "Name", model.SpecializationId);
+            ViewBag.DoctorId = id; // UpdateDoctorRequest.id is actually the UserId string, not the Doctor's int Id
+
+            return View(model);
         }
 
         // POST: DoctorController/Edit/5
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public async Task<ActionResult> Edit(int id, UpdateDoctorRequest doctorRequest)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                var specs = await _unitOfWork.Repository<Specialization>().GetAllAsync();
+                ViewBag.Specializations = new SelectList(specs, "Id", "Name", doctorRequest.SpecializationId);
+                ViewBag.DoctorId = id;
+                return View(doctorRequest);
             }
-            catch
-            {
-                return View();
-            }
+
+            await _adminServices.UpdateValuesOfDoctor(doctorRequest, id);
+
+            // return RedirectToAction(nameof(Details), new { id });
+            return RedirectToAction("ManageDoctors", "Admin");
         }
 
         // GET: DoctorController/Delete/5
-        public ActionResult Delete(int id)
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult> Delete(int id)
         {
-            return View();
+            var doctor = await _adminServices.FetchDoctorData(id);
+            if (doctor is null) return NotFound();
+
+            return View(doctor);
         }
 
         // POST: DoctorController/Delete/5
-        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [HttpPost, ActionName(nameof(Delete))]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public async Task<ActionResult> DeleteConfirmed(int id)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            await _adminServices.DeleteDoctor(id);
+            return RedirectToAction("ManageDoctors", "Admin");
         }
     }
 }
+

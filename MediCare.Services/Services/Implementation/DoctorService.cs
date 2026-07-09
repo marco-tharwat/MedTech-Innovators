@@ -17,10 +17,17 @@ namespace MediCare.Services.Services.Implementation
         // list/search doctors, only publicly showing doctors approved by admin
         public async Task<IEnumerable<Doctor>> SearchAsync(string? searchTerm, int? specializationId, string? location)
         {
-            var query = _unitOfWork.Doctors.Query()
+            // Doctor has to be Approved in order to show on the system
+
+            // var query = _unitOfWork.Doctors.Query()
+            //     .Include(d => d.User)
+            //     .Include(d => d.Specialization)
+            //     .Where(d => d.IsApproved);
+
+            // I temporarily disabled that feature
+            IQueryable<Doctor> query = _unitOfWork.Doctors.Query()
                 .Include(d => d.User)
-                .Include(d => d.Specialization)
-                .Where(d => d.IsApproved);
+                .Include(d => d.Specialization);
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
@@ -45,11 +52,20 @@ namespace MediCare.Services.Services.Implementation
 
         public async Task<Doctor?> GetDetailsAsync(int id)
         {
+            // return await _unitOfWork.Doctors.Query()
+            //     .Include(d => d.User)
+            //     .Include(d => d.Specialization)
+            //     .Include(d => d.WorkingHours)
+            //     .FirstOrDefaultAsync(d => d.Id == id && d.IsApproved);
+            //          there is a bug here                   ^^^^^^^^^^  while there is no doctors approved (and i can not approve a doctor yet => bio & image bug)
+            //          the return value is null, so the NotFound view is luanched insted of Details
+            //          i believe we should show details of doctor whatever its approval status is
+
             return await _unitOfWork.Doctors.Query()
                 .Include(d => d.User)
                 .Include(d => d.Specialization)
                 .Include(d => d.WorkingHours)
-                .FirstOrDefaultAsync(d => d.Id == id && d.IsApproved);
+                .FirstOrDefaultAsync(d => d.Id == id);
         }
 
         public async Task<Doctor?> GetByUserIdAsync(string userId)

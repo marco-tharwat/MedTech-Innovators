@@ -164,6 +164,9 @@ namespace MediCare.Services.Services
 
         public async Task<Specialization?> GetSpecialization(int id)
         {
+            // FirstOrDefaultAsync (not FirstAsync): returns null when the specialization
+            // does not exist instead of throwing "Sequence contains no elements". The
+            // caller (AdminController.Specialization) already handles the null case.
             var res = await _unitOfWork.Repository<Specialization>()
                 .Query().Include(x => x.Doctors).ThenInclude(x=>x.User).FirstOrDefaultAsync(x => x.Id == id);
             return res;

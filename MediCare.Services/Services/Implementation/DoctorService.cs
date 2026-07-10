@@ -19,15 +19,15 @@ namespace MediCare.Services.Services.Implementation
         {
             // Doctor has to be Approved in order to show on the system
 
-            // var query = _unitOfWork.Doctors.Query()
-            //     .Include(d => d.User)
-            //     .Include(d => d.Specialization)
-            //     .Where(d => d.IsApproved);
+            var query = _unitOfWork.Doctors.Query()
+                .Include(d => d.User)
+                .Include(d => d.Specialization)
+                .Where(d => d.IsApproved);
 
             // I temporarily disabled that feature
-            IQueryable<Doctor> query = _unitOfWork.Doctors.Query()
-                .Include(d => d.User)
-                .Include(d => d.Specialization);
+            // IQueryable<Doctor> query = _unitOfWork.Doctors.Query()
+            //     .Include(d => d.User)
+            //     .Include(d => d.Specialization);
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {

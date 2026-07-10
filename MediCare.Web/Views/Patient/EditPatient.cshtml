@@ -31,8 +31,18 @@
 
                         <div class="mb-3">
                             <label asp-for="BloodType" class="form-label">Blood Type</label>
-                            <input asp-for="BloodType" class="form-control" placeholder="e.g. A+, O-" />
-                        </div>
+                            <select asp-for="BloodType" class="form-select">
+                                <option value="">Select Blood Type</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                            <span asp-validation-for="BloodType" class="text-danger"></span>                        </div>
 
                         <div class="mb-3">
                             <label asp-for="EmergencyContact" class="form-label">Emergency Contact</label>

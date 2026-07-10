@@ -1,7 +1,8 @@
-﻿using MediCare.Services.DTO;
+using MediCare.Services.DTO;
 using MediCare.Services.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MediCare.Web.Controllers
 {
@@ -98,15 +99,16 @@ namespace MediCare.Web.Controllers
         {
             var flag = await _adminServices.DeleteDoctor(id);
             if (flag)
-                return RedirectToAction("Specialization", new { specID });
-            return RedirectToAction("Specialization", new { specID });
+                return RedirectToAction("Specialization", new { id = specID });
+            return RedirectToAction("Specialization", new { id = specID });
         }
 
         [HttpGet]
         public async Task<ActionResult> UpdateDoctor(int id, int specID)
         {
             var model = await _adminServices.mapFromDoctorToUpdateDoctorRequest(id);
-            if (model is null) return RedirectToAction("Specialization", new { specID });
+            if (model is null) return RedirectToAction("Specialization", new { id = specID });
+            await PopulateSpecializationsAsync(model.SpecializationId);
             return View(model);
         }
 
@@ -114,9 +116,21 @@ namespace MediCare.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> UpdateDoctor(UpdateDoctorRequest doctorRequest, int specID, int id)
         {
-            if (!ModelState.IsValid) return View(doctorRequest);
+            if (!ModelState.IsValid)
+            {
+                await PopulateSpecializationsAsync(doctorRequest.SpecializationId);
+                return View(doctorRequest);
+            }
             await _adminServices.UpdateValuesOfDoctor(doctorRequest, id);
-            return RedirectToAction("Specialization", new { specID });
+            return RedirectToAction("ManageDoctors");
+        }
+
+        // Builds the Specialization dropdown from the existing service/repository layer,
+        // preselecting the given id. Shared by the UpdateDoctor GET/POST actions.
+        private async Task PopulateSpecializationsAsync(int selectedId)
+        {
+            var specializations = await _adminServices.GetSpecializationSetupAsync();
+            ViewBag.Specializations = new SelectList(specializations, "id", "Name", selectedId);
         }
 
         [HttpGet]

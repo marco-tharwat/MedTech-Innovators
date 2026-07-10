@@ -36,4 +36,21 @@ document.addEventListener('DOMContentLoaded', function () {
     if (bestLink) {
         bestLink.classList.add('active');
     }
+
+    // Show/Hide password toggle. Works for any button marked [data-password-toggle]
+    // that sits in the same .input-group as a password input. Event delegation keeps
+    // it independent per field and resilient to multiple fields on one page.
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-password-toggle]');
+        if (!btn) return;
+
+        var group = btn.closest('.input-group');
+        var input = group ? group.querySelector('input') : null;
+        if (!input) return;
+
+        var show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.textContent = show ? 'Hide' : 'Show';
+        btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    });
 });

@@ -8,7 +8,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace MediCare.Services.Services;
-public class AdminServices(IUnitOfWork _unitOfWork,UserManager<ApplicationUser> _userManager):IAdminServices
+
+public class AdminServices(IUnitOfWork _unitOfWork, UserManager<ApplicationUser> _userManager) : IAdminServices
 {
     public async Task<ReportsResponse> GetReportsAsync()
     {
@@ -89,82 +90,82 @@ public class AdminServices(IUnitOfWork _unitOfWork,UserManager<ApplicationUser> 
         return model;
     }
 
-        public async Task<bool> DeleteDoctor(int id)
+    public async Task<bool> DeleteDoctor(int id)
+    {
+        var doctor = await _unitOfWork.Doctors.GetByIdAsync(id);
+        if (doctor is null) return false;
+
+        // A Doctor account is an ApplicationUser + a Doctor profile created together
+        // (see AccountController.Register / DoctorController.Create). Deleting must mirror
+        // that: remove the profile and the Identity user in one atomic transaction, so the
+        // user can no longer log in once the Doctor is gone.
+        await _unitOfWork.BeginTransactionAsync();
+        try
         {
-            var doctor = await _unitOfWork.Doctors.GetByIdAsync(id);
-            if (doctor is null) return false;
+            _unitOfWork.Doctors.Remove(doctor);
+            await _unitOfWork.SaveChangesAsync();
 
-            // A Doctor account is an ApplicationUser + a Doctor profile created together
-            // (see AccountController.Register / DoctorController.Create). Deleting must mirror
-            // that: remove the profile and the Identity user in one atomic transaction, so the
-            // user can no longer log in once the Doctor is gone.
-            await _unitOfWork.BeginTransactionAsync();
-            try
-            {
-                _unitOfWork.Doctors.Remove(doctor);
-                await _unitOfWork.SaveChangesAsync();
-
-                if (!await DeleteIdentityUserAsync(doctor.UserId))
-                {
-                    await _unitOfWork.RollbackTransactionAsync();
-                    return false;
-                }
-
-                await _unitOfWork.CommitTransactionAsync();
-                return true;
-            }
-            catch
+            if (!await DeleteIdentityUserAsync(doctor.UserId))
             {
                 await _unitOfWork.RollbackTransactionAsync();
                 return false;
             }
+
+            await _unitOfWork.CommitTransactionAsync();
+            return true;
         }
-
-        public async Task<bool> DeletePatient(int id)
+        catch
         {
-            var patient = await _unitOfWork.Patients.GetByIdAsync(id);
-            if (patient is null) return false;
+            await _unitOfWork.RollbackTransactionAsync();
+            return false;
+        }
+    }
 
-            // Mirror the creation flow (ApplicationUser + Patient profile) on delete: remove the
-            // profile and its Identity user together so the account cannot outlive the patient.
-            await _unitOfWork.BeginTransactionAsync();
-            try
-            {
-                _unitOfWork.Patients.Remove(patient);
-                await _unitOfWork.SaveChangesAsync();
+    public async Task<bool> DeletePatient(int id)
+    {
+        var patient = await _unitOfWork.Patients.GetByIdAsync(id);
+        if (patient is null) return false;
 
-                if (!await DeleteIdentityUserAsync(patient.UserId))
-                {
-                    await _unitOfWork.RollbackTransactionAsync();
-                    return false;
-                }
+        // Mirror the creation flow (ApplicationUser + Patient profile) on delete: remove the
+        // profile and its Identity user together so the account cannot outlive the patient.
+        await _unitOfWork.BeginTransactionAsync();
+        try
+        {
+            _unitOfWork.Patients.Remove(patient);
+            await _unitOfWork.SaveChangesAsync();
 
-                await _unitOfWork.CommitTransactionAsync();
-                return true;
-            }
-            catch
+            if (!await DeleteIdentityUserAsync(patient.UserId))
             {
                 await _unitOfWork.RollbackTransactionAsync();
                 return false;
             }
-        }
 
-        // Removes the backing Identity user through the same UserManager that created it.
-        // Returns true when there is nothing to delete or the delete succeeds.
-        private async Task<bool> DeleteIdentityUserAsync(string userId)
+            await _unitOfWork.CommitTransactionAsync();
+            return true;
+        }
+        catch
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user is null) return true;
-
-            var result = await _userManager.DeleteAsync(user);
-            return result.Succeeded;
+            await _unitOfWork.RollbackTransactionAsync();
+            return false;
         }
+    }
+
+    // Removes the backing Identity user through the same UserManager that created it.
+    // Returns true when there is nothing to delete or the delete succeeds.
+    private async Task<bool> DeleteIdentityUserAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null) return true;
+
+        var result = await _userManager.DeleteAsync(user);
+        return result.Succeeded;
+    }
 
 
     public async Task<Specialization?> GetSpecialization(int id)
     {
         var res = await _unitOfWork.Repository<Specialization>()
-            .Query().Include(x => x.Doctors).ThenInclude(x=>x.User).FirstAsync(x => x.Id == id);
+            .Query().Include(x => x.Doctors).ThenInclude(x => x.User).FirstOrDefaultAsync(x => x.Id == id);
         return res;
     }
 
@@ -213,35 +214,35 @@ public class AdminServices(IUnitOfWork _unitOfWork,UserManager<ApplicationUser> 
     public async Task<SummaryOfDataForAdmin> SetSummaryOfDataForAdmin()
     {
         var ListDoctors = await _unitOfWork.Doctors.GetAllAsync();
-        int TotalNumberOfDoctors= ListDoctors.Count();
-        int DoctorsPending=ListDoctors.Where(x=>x.IsApproved==false).Count();
+        int TotalNumberOfDoctors = ListDoctors.Count();
+        int DoctorsPending = ListDoctors.Where(x => x.IsApproved == false).Count();
 
-        var ListOfPatients=await _unitOfWork.Patients.GetAllAsync();
+        var ListOfPatients = await _unitOfWork.Patients.GetAllAsync();
         int TotalNumberOfPatients = ListOfPatients.Count();
 
-        var ListOfAppointments=await _unitOfWork.Appointments.GetAllAsync();
+        var ListOfAppointments = await _unitOfWork.Appointments.GetAllAsync();
         int NumOfAppointments = ListOfAppointments.Count();
         int NumOfAppointmentsScheduledForToday = ListOfAppointments.Where(x => x.AppointmentDate.Date == DateTime.Today).Count();
 
         return new SummaryOfDataForAdmin
         {
-            TotalNumberOfDoctors= TotalNumberOfDoctors,
-            TotalNumberOfPatients= TotalNumberOfPatients,
-            DoctorsPending= DoctorsPending,
-            NumOfAppointments= NumOfAppointments,
+            TotalNumberOfDoctors = TotalNumberOfDoctors,
+            TotalNumberOfPatients = TotalNumberOfPatients,
+            DoctorsPending = DoctorsPending,
+            NumOfAppointments = NumOfAppointments,
             NumOfAppointmentsScheduledForToday = NumOfAppointmentsScheduledForToday
         };
     }
 
     public async Task<Doctor?> FetchDoctorData(int id)
     {
-        var data = await _unitOfWork.Doctors.Query().Include(x => x.User).FirstAsync(x=>x.Id==id);
+        var data = await _unitOfWork.Doctors.Query().Include(x => x.User).FirstAsync(x => x.Id == id);
         return data;
     }
 
     public async Task<IEnumerable<Doctor>> FetchDoctorsData()
     {
-        var data =_unitOfWork.Doctors.Query().Include(x => x.User).Include(_=>_.Specialization).AsEnumerable();
+        var data = _unitOfWork.Doctors.Query().Include(x => x.User).Include(_ => _.Specialization).AsEnumerable();
         return data;
     }
 
@@ -253,7 +254,7 @@ public class AdminServices(IUnitOfWork _unitOfWork,UserManager<ApplicationUser> 
 
     public async Task<Patient> FetchPatientData(int id)
     {
-        var data = await _unitOfWork.Patients.Query().Include(_ => _.User).FirstAsync(_=>_.Id==id);
+        var data = await _unitOfWork.Patients.Query().Include(_ => _.User).FirstAsync(_ => _.Id == id);
         return data;
     }
 
@@ -269,12 +270,12 @@ public class AdminServices(IUnitOfWork _unitOfWork,UserManager<ApplicationUser> 
     {
         var data = await _unitOfWork.Repository<ApplicationUser>().GetAllAsync();
         List<RegisteredAccountsData> registeredAccountsDatas = new();
-        foreach(var item in data)
+        foreach (var item in data)
         {
             var roles = await _userManager.GetRolesAsync(item);
-            var role=roles[0];
+            var role = roles[0];
             registeredAccountsDatas
-                .Add(new RegisteredAccountsData 
+                .Add(new RegisteredAccountsData
                 { Name = item.UserName ?? "", Email = item.Email, Role = role, Created = item.Created });
         }
         return registeredAccountsDatas;
@@ -330,13 +331,13 @@ public class AdminServices(IUnitOfWork _unitOfWork,UserManager<ApplicationUser> 
         int pageSize = 3;
         int totalCount = data.Count();
         int numOfPages = (int)Math.Ceiling((double)totalCount / pageSize);
-        var model=data.Skip((PageNum - 1) * pageSize).Take(pageSize).ToList();
+        var model = data.Skip((PageNum - 1) * pageSize).Take(pageSize).ToList();
 
 
         return new AppointmentsDTO
         {
             Appointments = model,
-            TotalCount=totalCount,
+            TotalCount = totalCount,
             Status = status,
             Date = date,
             NumOfPages = numOfPages,
@@ -348,8 +349,8 @@ public class AdminServices(IUnitOfWork _unitOfWork,UserManager<ApplicationUser> 
     public async Task<bool> UpdatePatients(UpdatePatientsRequest request)
     {
         int id = request.id;
-        var data=await FetchPatientData(id);
-        if(data is null)return false;
+        var data = await FetchPatientData(id);
+        if (data is null) return false;
         if (data.User != null)
             data.User.FullName = request.Name;
         data.BirthDate = request.BirthDate;

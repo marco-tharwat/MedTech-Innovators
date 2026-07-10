@@ -36,7 +36,10 @@
 
                         <div class="mb-3">
                             <label asp-for="Password" class="form-label"></label>
-                            <input asp-for="Password" type="password" class="form-control" placeholder="Password" />
+                            <div class="input-group">
+                                <input asp-for="Password" type="password" class="form-control" placeholder="Password" />
+                                <button type="button" class="btn btn-outline-secondary" data-password-toggle aria-label="Show password">Show</button>
+                            </div>
                         </div>
 
                         <div class="mb-3">

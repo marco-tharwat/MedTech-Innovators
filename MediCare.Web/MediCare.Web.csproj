@@ -25,4 +25,8 @@
     <ProjectReference Include="..\MediCare.Services\MediCare.Services.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\Uploads\MedicalDocuments\" />
+  </ItemGroup>
+
 </Project>

@@ -1,5 +1,4 @@
 using MediCare.Data.Models;
-using MediCare.Data.Repositories.Implementations;
 using MediCare.Data.Repositories.Interfaces;
 using MediCare.Web.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -48,7 +47,7 @@ namespace MediCare.Web.Controllers
             { FullName = request.Name, Gender = request.Gender, Email = request.Email, UserName = request.UserName, Created = DateTime.Today };
 
             var response = await _accountRepositories
-                .SetNewAccount(user, request.Role, request.SpecializationId, request.Password);
+                .SetNewAccount(user, request.Role, request.SpecializationId, request.Password, request.BirthDate);
 
             if (response is null || response.Count() == 0)
                 return RedirectToAction("Login");

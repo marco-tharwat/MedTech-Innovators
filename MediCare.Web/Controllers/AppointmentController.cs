@@ -5,6 +5,8 @@ using MediCare.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace MediCare.Web.Controllers
 {
@@ -16,19 +18,22 @@ namespace MediCare.Web.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IPatientRepository _patientRepository;
         private readonly IDoctorRepository _doctorRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
         public AppointmentController(
             IAppointmentService appointmentService,
             IWorkingHoursService workingHoursService,
             UserManager<ApplicationUser> userManager,
             IPatientRepository patientRepository,
-            IDoctorRepository doctorRepository)
+            IDoctorRepository doctorRepository,
+            IUnitOfWork unitOfWork)
         {
             _appointmentService = appointmentService;
             _workingHoursService = workingHoursService;
             _userManager = userManager;
             _patientRepository = patientRepository;
             _doctorRepository = doctorRepository;
+            _unitOfWork = unitOfWork;
         }
 
         // ── Patient: Book ─────────────────────────────────────────────────────
@@ -39,26 +44,18 @@ namespace MediCare.Web.Controllers
         {
             var selectedDate = date ?? DateTime.Today;
 
-            // FIX: use the repository method that Includes Specialization.
-            // Note: this method does NOT include the related User, so we fetch
-            // it separately via UserManager using doctor.UserId.
-            var doctor = await _doctorRepository.GetDoctorWithSpecializationAsync(doctorId);
+            //var doctor = await _userManager.Users
+            //    .Select(u => u.DoctorProfile)
+            //    .FirstOrDefaultAsync(d => d != null && d.Id == doctorId);
 
-            ApplicationUser? doctorUser = null;
-            if (doctor is not null)
-            {
-                doctorUser = await _userManager.FindByIdAsync(doctor.UserId);
-            }
+            var doctor =await _unitOfWork.Repository<Doctor>().Query().Include(_ => _.User).Include(_=>_.Specialization).FirstOrDefaultAsync(_ => _.Id == doctorId);
 
             var slots = await _workingHoursService.GetAvailableSlotsAsync(doctorId, selectedDate);
 
             var vm = new BookAppointmentViewModel
             {
                 DoctorId = doctorId,
-                // FIX: added extra null-conditional (?.) before FullName / Name
-                // so that a missing User or Specialization doesn't throw a
-                // NullReferenceException.
-                DoctorName = doctorUser?.FullName ?? "",
+                DoctorName = doctor?.User.FullName ?? "",
                 SpecializationName = doctor?.Specialization?.Name ?? "",
                 SelectedDate = selectedDate,
                 AvailableSlots = slots.ToList()
@@ -128,9 +125,8 @@ namespace MediCare.Web.Controllers
             {
                 AppointmentId = id,
                 DoctorId = appointment.DoctorId,
-                // FIX: guard against missing Doctor/User/Specialization
-                DoctorName = appointment.Doctor?.User?.FullName ?? "",
-                SpecializationName = appointment.Doctor?.Specialization?.Name ?? "",
+                DoctorName = appointment.Doctor.User.FullName,
+                SpecializationName = appointment.Doctor.Specialization.Name,
                 SelectedDate = selectedDate,
                 AvailableSlots = slots.ToList()
             };
@@ -170,14 +166,13 @@ namespace MediCare.Web.Controllers
         [Authorize(Roles = "Patient")]
         public async Task<IActionResult> PatientAppointments()
         {
+            var rol = (User.FindFirst(ClaimTypes.Role)?.Value ?? "");
             var user = await _userManager.GetUserAsync(User);
-            if (user is null) return Forbid();
-
-            // FIX: removed unused / risky variables (rol, id, userid) that added
-            // no value and could throw if patient was null before the check.
-            var patient = await _patientRepository.GetPatientByUserIdAsync(user.Id);
+            //var patient = user?.PatientProfile;
+            var id = user!.Id;
+            Patient? patient =await _patientRepository.GetPatientByUserIdAsync(user!.Id);
+            var userid=patient!.UserId;
             if (patient is null) return Forbid();
-
             var appointments = await _appointmentService.GetByPatientIdAsync(patient.Id);
             return View(appointments.ToList());
         }
@@ -188,9 +183,7 @@ namespace MediCare.Web.Controllers
         public async Task<IActionResult> DoctorDailyList(DateTime? date)
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user is null) return Forbid();
-
-            var doctor = await _doctorRepository.GetDoctorByUserIdAsync(user.Id);
+            var doctor = await _doctorRepository.GetDoctorByUserIdAsync(user!.Id);
             if (doctor is null) return Forbid();
 
             var selectedDate = date ?? DateTime.Today;
@@ -239,9 +232,7 @@ namespace MediCare.Web.Controllers
         public async Task<IActionResult> ManageWorkingHours()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user is null) return Forbid();
-
-            var doctor = await _doctorRepository.GetDoctorByUserIdAsync(user.Id);
+            var doctor = await _doctorRepository.GetDoctorByUserIdAsync(user!.Id);
             if (doctor is null) return Forbid();
 
             var workingHours = await _workingHoursService.GetByDoctorIdAsync(doctor.Id);

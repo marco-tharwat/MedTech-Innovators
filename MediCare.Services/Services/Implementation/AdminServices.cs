@@ -57,7 +57,7 @@ namespace MediCare.Services.Services
             if (doctor is null) return false;
             if (doctorRequest.IsApproved && !doctor.IsApproved)
             {
-                var notification = NotificationFactory.DoctorApproved(doctor.UserId);
+                var notification =NotificationFactory.DoctorApproved(doctor.UserId);
                 await _unitOfWork.Repository<Notification>().AddAsync(notification);
                 await _unitOfWork.SaveChangesAsync();
             }
@@ -165,7 +165,7 @@ namespace MediCare.Services.Services
         public async Task<Specialization?> GetSpecialization(int id)
         {
             var res = await _unitOfWork.Repository<Specialization>()
-                .Query().Include(x => x.Doctors).ThenInclude(x=>x.User).FirstAsync(x => x.Id == id);
+                .Query().Include(x => x.Doctors).ThenInclude(x=>x.User).FirstOrDefaultAsync(x => x.Id == id);
             return res;
         }
 

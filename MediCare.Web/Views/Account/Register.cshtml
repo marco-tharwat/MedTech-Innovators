@@ -37,7 +37,10 @@
 
                         <div class="mb-3">
                             <label asp-for="Password" class="form-label"></label>
-                            <input asp-for="Password" type="password" class="form-control form-control-lg" placeholder="Enter password" />
+                            <div class="input-group input-group-lg">
+                                <input asp-for="Password" type="password" class="form-control form-control-lg" placeholder="Enter password" />
+                                <button type="button" class="btn btn-outline-secondary" data-password-toggle aria-label="Show password">Show</button>
+                            </div>
                         </div>
 
                         <div class="mb-3">
@@ -66,6 +69,12 @@
                             <span asp-validation-for="SpecializationId" class="text-danger"></span>
                         </div>
 
+                        <div class="mb-3" id="birthDateBox" style="display: none;">
+                            <label asp-for="BirthDate" class="form-label">Birth Date</label>
+                            <input asp-for="BirthDate" type="date" class="form-control form-control-lg" id="BirthDateInput" />
+                            <span asp-validation-for="BirthDate" class="text-danger"></span>
+                        </div>
+
                         <button type="submit" class="btn btn-primary btn-lg w-100 rounded-3">
                             Register
                         </button>
@@ -86,11 +95,21 @@
     <script>
         document.getElementById('roleSelect').addEventListener('change', function () {
             var specBox = document.getElementById('specializationBox');
+            var birthDateBox = document.getElementById('birthDateBox');
+
             if (this.value === 'Doctor') {
                 specBox.style.display = 'block';
+                birthDateBox.style.display = 'none';
+                document.getElementById('BirthDateInput').value = '';
+            } else if (this.value === 'Patient') {
+                specBox.style.display = 'none';
+                document.getElementById('SpecializationId').value = '';
+                birthDateBox.style.display = 'block';
             } else {
                 specBox.style.display = 'none';
                 document.getElementById('SpecializationId').value = '';
+                birthDateBox.style.display = 'none';
+                document.getElementById('BirthDateInput').value = '';
             }
         });
     </script>

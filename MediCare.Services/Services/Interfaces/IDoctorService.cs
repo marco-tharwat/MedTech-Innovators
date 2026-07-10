@@ -6,5 +6,7 @@ namespace MediCare.Services.Services.Interfaces
     {
         Task<IEnumerable<Doctor>> SearchAsync(string? searchTerm, int? specializationId, string? location);
         Task<Doctor?> GetDetailsAsync(int id);
+        Task<Doctor?> GetByUserIdAsync(string userId);
+        Task<bool> ExistAsync(string userId);
     }
 }

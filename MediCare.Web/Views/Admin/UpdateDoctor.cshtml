@@ -47,13 +47,13 @@
     </div>
 
     <div class="mb-3">
-        <label asp-for="SpecializationId" class="form-label">Specialization ID</label>
-        <input asp-for="SpecializationId" class="form-control" type="number" />
+        <label asp-for="SpecializationId" class="form-label">Specialization</label>
+        <select asp-for="SpecializationId" class="form-select" asp-items="ViewBag.Specializations"></select>
         <span asp-validation-for="SpecializationId" class="text-danger"></span>
     </div>
 
     <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Specialization" asp-route-id="@Context.Request.Query["specID"]" class="btn btn-secondary">Cancel</a>
+    <a asp-action="ManageDoctors" class="btn btn-secondary">Cancel</a>
 </form>
 
 @section Scripts {

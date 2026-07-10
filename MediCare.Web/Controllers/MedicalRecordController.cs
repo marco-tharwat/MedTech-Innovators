@@ -1,26 +1,30 @@
 ﻿using MediCare.Data.Models;
-using MediCare.Data.Repositories.Interfaces;
 using MediCare.Services.Interfaces;
+using MediCare.Services.Services.Interfaces;
 using MediCare.Web.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace MediCare.Web.Controllers
 {
+    [Authorize(Roles = "Doctor, Admin")]
     public class MedicalRecordController : Controller
     {
         private readonly IMedicalRecordService _medicalRecordService;
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IPatientService _patientService;
+        private readonly IDoctorService _doctorService;
 
-        public MedicalRecordController(IMedicalRecordService medicalRecordService, IUnitOfWork unitOfWork)
+        public MedicalRecordController(IMedicalRecordService medicalRecordService, IPatientService patientService, IDoctorService doctorService)
         {
             _medicalRecordService = medicalRecordService;
-            this.unitOfWork = unitOfWork;
+            _patientService = patientService;
+            _doctorService = doctorService;
         }
         [HttpGet]
         public async Task<ActionResult> GetPatientHistory(int patientId)
         {
-            if (patientId <= 0) return BadRequest();
+            if (patientId <= 0) return BadRequest("The patient isn't in the database");
 
             var medicalHistory = await _medicalRecordService.GetPatientHistoryAsync(patientId);
 
@@ -34,6 +38,7 @@ namespace MediCare.Web.Controllers
             var medicalRecord = await _medicalRecordService.GetRecordDetailsAsync(medicalRecordId);
 
             if (medicalRecord == null) return NotFound("The medical record does not exist");
+            #region mapping
             var vm = new MedicalRecordDetailsViewModel
             {
                 PatientName = medicalRecord.Patient.User.FullName,
@@ -44,7 +49,7 @@ namespace MediCare.Web.Controllers
                 MedicalRecordId = medicalRecord.Id,
                 DoctorName = medicalRecord.Doctor.User.FullName,
                 Specialization = medicalRecord.Doctor.Specialization?.Name,
-
+                PatientId = medicalRecord.PatientId,
                 CreatedAt = medicalRecord.CreatedAt,
                 Diagnosis = medicalRecord.Diagnosis,
                 Symptoms = medicalRecord.Symptoms,
@@ -69,17 +74,19 @@ namespace MediCare.Web.Controllers
                         Id = d.Id,
                         FilePath = d.FilePath,
                         FileType = d.FileType,
+                        OriginalFileName = d.OriginalFileName,
                         UploadedAt = d.UploadedAt
                     })
                     .ToList()
             };
+            #endregion
 
             return View("RecordDetails", vm);
         }
         [HttpGet]
         public async Task<IActionResult> CreateMedicalRecord()
         {
-            var patients = await unitOfWork.Patients.GetAllWithUsersAsync();
+            var patients = await _patientService.GetPatientsWithUsersAsync();
 
             var vm = new MedicalRecordViewModel
             {
@@ -100,11 +107,17 @@ namespace MediCare.Web.Controllers
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                var doctor = await unitOfWork.Doctors.FirstOrDefaultAsync(d => d.UserId == userId);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    ModelState.AddModelError("", "An unexpected error occurred while identifying the doctor...");
+                    return View(viewModel);
+                }
+
+                var doctor = await _doctorService.GetByUserIdAsync(userId);
                 if (doctor == null)
                 {
                     ModelState.AddModelError("", "An unexpected error occurred while identifying the doctor...");
-                    var patientsWithUsers = await unitOfWork.Patients.GetAllWithUsersAsync();
+                    var patientsWithUsers = await _patientService.GetPatientsWithUsersAsync();
 
                     viewModel.Patients = patientsWithUsers.Select(p => new PatientDropdownItem
                     {
@@ -129,7 +142,7 @@ namespace MediCare.Web.Controllers
                 if (success) return RedirectToAction("GetRecordDetails", new { medicalRecordId = medicalRecord.Id });
             }
             ModelState.AddModelError("", "An unexpected error occurred while saving...");
-            var patients = await unitOfWork.Patients.GetAllWithUsersAsync();
+            var patients = await _patientService.GetPatientsWithUsersAsync();
 
             viewModel.Patients = patients.Select(p => new PatientDropdownItem
             {

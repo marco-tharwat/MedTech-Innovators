@@ -287,28 +287,6 @@ namespace MediCare.Services.Services
 
             if (!string.IsNullOrEmpty(date))
             {
-                status = (status ?? "allData").ToLower();
-                switch (status)
-                {
-                    case "pending":
-                        data = data.Where(_ => _.Status == Status.Pending);
-                        break;
-                    case "confirmed":
-                        data = data.Where(_ => _.Status == Status.Confirmed);
-                        break;
-                    case "completed":
-                        data = data.Where(_ => _.Status == Status.Completed);
-                        break;
-                    case "cancelled":
-                        data = data.Where(_ => _.Status == Status.Cancelled);
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            if (date is not null)
-            {
                 date = date.ToLower();
 
                 if (date == "today")
@@ -323,6 +301,25 @@ namespace MediCare.Services.Services
                 {
                     var r = data.Where(_ => _.AppointmentDate.Month == DateTime.Today.Month);
                 }
+            }
+
+            status = (status ?? "allData").ToLower();
+            switch (status)
+            {
+                case "pending":
+                    data = data.Where(_ => _.Status == Status.Pending);
+                    break;
+                case "confirmed":
+                    data = data.Where(_ => _.Status == Status.Confirmed);
+                    break;
+                case "completed":
+                    data = data.Where(_ => _.Status == Status.Completed);
+                    break;
+                case "cancelled":
+                    data = data.Where(_ => _.Status == Status.Cancelled);
+                    break;
+                default:
+                    break;
             }
 
             order = (order ?? "ASC").ToLower();

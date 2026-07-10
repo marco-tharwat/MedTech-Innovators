@@ -47,8 +47,8 @@
     </div>
 
     <div class="mb-3">
-        <label asp-for="SpecializationId" class="form-label">Specialization ID</label>
-        <input asp-for="SpecializationId" class="form-control" type="number" />
+        <label asp-for="SpecializationId" class="form-label">Specialization</label>
+        <select asp-for="SpecializationId" class="form-select" asp-items="ViewBag.Specializations"></select>
         <span asp-validation-for="SpecializationId" class="text-danger"></span>
     </div>
 

@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Home";
 }
 
@@ -17,8 +17,24 @@
                 <div class="d-flex flex-wrap gap-3">
                     @if (User.Identity?.IsAuthenticated == true)
                     {
-                        <a class="btn btn-primary btn-lg rounded-3 px-4" asp-controller="Doctor" asp-action="Index">Find a Doctor</a>
-                        <a class="btn btn-outline-primary btn-lg rounded-3 px-4" asp-controller="Appointment" asp-action="MyAppointments">My Appointments</a>
+                        if (User.IsInRole("Admin"))
+                        {
+                            <a class="btn btn-primary btn-lg rounded-3 px-4" asp-controller="Admin" asp-action="Dashboard">Go to Dashboard</a>
+                        }
+                        else if (User.IsInRole("Doctor"))
+                        {
+                            <a class="btn btn-primary btn-lg rounded-3 px-4" asp-controller="Doctor" asp-action="Index">Go to My Dashboard</a>
+                            <a class="btn btn-outline-primary btn-lg rounded-3 px-4" asp-controller="Appointment" asp-action="DoctorDailyList">Today's Appointments</a>
+                        }
+                        else if (User.IsInRole("Patient"))
+                        {
+                            <a class="btn btn-primary btn-lg rounded-3 px-4" asp-controller="Patient" asp-action="Index">Go to My Dashboard</a>
+                            <a class="btn btn-outline-primary btn-lg rounded-3 px-4" asp-controller="Doctor" asp-action="Filter">Find a Doctor</a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-primary btn-lg rounded-3 px-4" asp-controller="Doctor" asp-action="Filter">Find a Doctor</a>
+                        }
                     }
                     else
                     {

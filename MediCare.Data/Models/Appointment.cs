@@ -23,5 +23,6 @@ namespace MediCare.Data.Models
         public Status Status { get; set; } = Status.Pending; // Pending, Confirmed, Completed, Cancelled
 
         public string? Notes { get; set; }
+        public AppointmentType Type { get; set; } = AppointmentType.New;
     }
 }

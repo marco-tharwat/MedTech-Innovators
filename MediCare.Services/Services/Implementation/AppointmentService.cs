@@ -3,17 +3,20 @@ using MediCare.Data.Models.Enum;
 using MediCare.Services.Services.Interfaces;
 using MediCare.Web.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using MediCare.Services.Factory;
+using MediCare.Services.Services;
 
-namespace MediCare.Services.Services.Implementation
+namespace MediCare.Services.Services.Implementation 
 {
     public class AppointmentService : IAppointmentService
     {
         private readonly MedContext _context;
-        private const int SlotDurationMinutes = 30;
+        private readonly AppointmentFactory _appointmentFactory;   
 
-        public AppointmentService(MedContext context)
+        public AppointmentService(MedContext context, AppointmentFactory appointmentFactory)
         {
             _context = context;
+            _appointmentFactory = appointmentFactory;
         }
 
         // ── Queries ───────────────────────────────────────────────────────────
@@ -70,14 +73,11 @@ namespace MediCare.Services.Services.Implementation
             if (isTaken)
                 return ServiceResult.Failure("This slot is already booked. Please choose another.");
 
-            await _context.Appointments.AddAsync(new Appointment
-            {
-                PatientId = patientId,
-                DoctorId = doctorId,
-                AppointmentDate = slot,
-                Notes = notes,
-                Status = Status.Pending
-            });
+            var appointment = await _appointmentFactory
+     .CreateAsync(patientId, doctorId, slot, notes);
+
+            await _context.Appointments.AddAsync(appointment);
+            await _context.SaveChangesAsync();
 
             await _context.SaveChangesAsync();
             return ServiceResult.Success();

@@ -11,8 +11,8 @@ namespace MediCare.Services.Services.Implementation
     public class AppointmentService : IAppointmentService
     {
         private readonly MedContext _context;
-        private readonly AppointmentFactory _appointmentFactory;   
-
+        private readonly AppointmentFactory _appointmentFactory;
+        private const int SlotDurationMinutes = 30;
         public AppointmentService(MedContext context, AppointmentFactory appointmentFactory)
         {
             _context = context;

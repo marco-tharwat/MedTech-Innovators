@@ -1,9 +1,6 @@
-﻿using MediCare.Data.Models;
-using MediCare.Data.Repositories.Interfaces;
-using MediCare.Services.DTO;
+﻿using MediCare.Services.DTO;
 using MediCare.Services.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediCare.Web.Controllers
@@ -21,13 +18,13 @@ namespace MediCare.Web.Controllers
         public async Task<ActionResult> Dashboard()
         {
             SummaryOfDataForAdmin model = await _adminServices.SetSummaryOfDataForAdmin();
-            return View("Dashboard",model);
+            return View("Dashboard", model);
         }
 
         [HttpGet]
         public async Task<IActionResult> ManageDoctors()
         {
-            var data= await _adminServices.FetchDoctorsData();
+            var data = await _adminServices.FetchDoctorsData();
             return View("ManageDoctors", data);
         }
 
@@ -41,15 +38,15 @@ namespace MediCare.Web.Controllers
         [HttpGet]
         public async Task<ActionResult> UpdatePatients(int id)
         {
-            var data=await _adminServices.FetchPatientData(id);
+            var data = await _adminServices.FetchPatientData(id);
             var model = new UpdatePatientsRequest
             {
                 id = id,
-                Name=data.User.FullName,
-                BirthDate=data.BirthDate,
-                BloodType=data.BloodType,
-                EmergencyContact=data.EmergencyContact,
-                Allergies=data.Allergies,
+                Name = data.User.FullName,
+                BirthDate = data.BirthDate,
+                BloodType = data.BloodType,
+                EmergencyContact = data.EmergencyContact,
+                Allergies = data.Allergies,
             };
             return View(model);
         }
@@ -58,15 +55,15 @@ namespace MediCare.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> UpdatePatients(UpdatePatientsRequest request)
         {
-            var flag=await _adminServices.UpdatePatients(request);
-            if (flag) return RedirectToAction("Dashboard");
+            var flag = await _adminServices.UpdatePatients(request);
+            if (flag) return RedirectToAction("ManagePatients");
             else return RedirectToAction("UpdatePatients");
         }
 
         [HttpGet]
-        public async Task<IActionResult> AllAppointments(string status,string order,string date,int PageNum)
+        public async Task<IActionResult> AllAppointments(string status, string order, string date, int PageNum)
         {
-            var model = await _adminServices.SetTheAppointments(status,order,date,PageNum);
+            var model = await _adminServices.SetTheAppointments(status, order, date, PageNum);
             return View("AllAppointments", model);
         }
 

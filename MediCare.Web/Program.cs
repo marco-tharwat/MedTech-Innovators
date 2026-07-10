@@ -54,7 +54,7 @@ using (var scope = app.Services.CreateScope())
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
     // Seed roles
-    await AccountController.SeedRolesAndAdminAccount(userManager, roleManager);
+    await AccountController.SeedRoles(roleManager);
 
     // Seed admin user
     var admin = await userManager.FindByNameAsync("admin");

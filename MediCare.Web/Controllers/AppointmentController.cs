@@ -18,19 +18,22 @@ namespace MediCare.Web.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IPatientRepository _patientRepository;
         private readonly IDoctorRepository _doctorRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
         public AppointmentController(
             IAppointmentService appointmentService,
             IWorkingHoursService workingHoursService,
             UserManager<ApplicationUser> userManager,
             IPatientRepository patientRepository,
-            IDoctorRepository doctorRepository)
+            IDoctorRepository doctorRepository,
+            IUnitOfWork unitOfWork)
         {
             _appointmentService = appointmentService;
             _workingHoursService = workingHoursService;
             _userManager = userManager;
             _patientRepository = patientRepository;
             _doctorRepository = doctorRepository;
+            _unitOfWork = unitOfWork;
         }
 
         // ── Patient: Book ─────────────────────────────────────────────────────
@@ -41,9 +44,11 @@ namespace MediCare.Web.Controllers
         {
             var selectedDate = date ?? DateTime.Today;
 
-            var doctor = await _userManager.Users
-                .Select(u => u.DoctorProfile)
-                .FirstOrDefaultAsync(d => d != null && d.Id == doctorId);
+            //var doctor = await _userManager.Users
+            //    .Select(u => u.DoctorProfile)
+            //    .FirstOrDefaultAsync(d => d != null && d.Id == doctorId);
+
+            var doctor =await _unitOfWork.Repository<Doctor>().Query().Include(_ => _.User).Include(_=>_.Specialization).FirstOrDefaultAsync(_ => _.Id == doctorId);
 
             var slots = await _workingHoursService.GetAvailableSlotsAsync(doctorId, selectedDate);
 
@@ -51,7 +56,7 @@ namespace MediCare.Web.Controllers
             {
                 DoctorId = doctorId,
                 DoctorName = doctor?.User.FullName ?? "",
-                SpecializationName = doctor?.Specialization.Name ?? "",
+                SpecializationName = doctor?.Specialization?.Name ?? "",
                 SelectedDate = selectedDate,
                 AvailableSlots = slots.ToList()
             };

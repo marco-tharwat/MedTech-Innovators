@@ -11,5 +11,6 @@ namespace MediCare.Web.ViewModels
         public string Role {  get; set; }=null!;
         public string Password {  get; set; } = null!;
         public int? SpecializationId {  get; set; }
+        public DateTime BirthDate { get; set; }
     }
 }

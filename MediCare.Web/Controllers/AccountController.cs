@@ -34,23 +34,23 @@ namespace MediCare.Web.Controllers
             return View("Register");
         }
 
-    [HttpPost]
-    public async Task<ActionResult> Register(RegisterRequest request)
-    {
-        if (request == null)
+        [HttpPost]
+        public async Task<ActionResult> Register(RegisterRequest request)
         {
-            ModelState.AddModelError("", "the data is not found");
-            return RedirectToAction("Register");
-        }
+            if (request == null)
+            {
+                ModelState.AddModelError("", "the data is not found");
+                return RedirectToAction("Register");
+            }
 
-        ApplicationUser user = new ApplicationUser
-        { FullName = request.Name, Gender = request.Gender, Email = request.Email, UserName = request.UserName, Created = DateTime.Today };
+            ApplicationUser user = new ApplicationUser
+            { FullName = request.Name, Gender = request.Gender, Email = request.Email, UserName = request.UserName, Created = DateTime.Today };
 
-        var response = await _accountRepositories
-            .SetNewAccount(user, request.Role, request.SpecializationId, request.Password);
+            var response = await _accountRepositories
+                .SetNewAccount(user, request.Role, request.SpecializationId, request.Password, request.BirthDate);
 
-        if (response is null || response.Count() == 0)
-            return RedirectToAction("Login");
+            if (response is null || response.Count() == 0)
+                return RedirectToAction("Login");
 
             foreach (var err in response)
             {

@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using MediCare.Data.Models;
+﻿using MediCare.Data.Models;
 using MediCare.Data.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
@@ -7,12 +6,12 @@ namespace MediCare.Data.Repositories.Implementations;
 
 public class AccountRepositories(UserManager<ApplicationUser> _userManager,IUnitOfWork _unitOfWork) : IAccountRepositories
 {
-    
-    public async Task<IEnumerable<string>> SetNewAccount(ApplicationUser user,string Role,int? SpecializationId,string password)
+
+    public async Task<IEnumerable<string>> SetNewAccount(ApplicationUser user, string Role, int? SpecializationId, string password, DateTime? BirthDate)
     {
         List<string> response = new();
 
-        var flag=await _userManager.CreateAsync(user, password);
+        var flag = await _userManager.CreateAsync(user, password);
         if (flag.Succeeded)
         {
             var res = await _userManager.AddToRoleAsync(user, Role);
@@ -33,6 +32,7 @@ public class AccountRepositories(UserManager<ApplicationUser> _userManager,IUnit
                     Patient patient = new Patient();
                     patient.User = user;
                     patient.UserId = user.Id;
+                    patient.BirthDate = BirthDate ?? default;
                     await _unitOfWork.Patients.AddAsync(patient);
                 }
                 await _unitOfWork.SaveChangesAsync();
@@ -47,7 +47,6 @@ public class AccountRepositories(UserManager<ApplicationUser> _userManager,IUnit
         {
             response.Add(error.Description);
         }
-        var specs = await _unitOfWork.Repository<Specialization>().GetAllAsync();
         return response;
     }
 }

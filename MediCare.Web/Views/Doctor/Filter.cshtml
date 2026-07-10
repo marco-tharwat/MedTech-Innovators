@@ -65,12 +65,16 @@
             }
         </div>
     </div>
-    @if (User.IsInRole("Patient"))
-    {
-        <a asp-controller="Patient" asp-action="Index" class="btn btn-secondary">Back To Dashboard</a>
-    }
-    else if (User.IsInRole("Doctor"))
-    {
-        <a asp-controller="Doctor" asp-action="Index" class="btn btn-secondary">Back To Dashboard</a>
-    }
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            @if (User.IsInRole("Patient"))
+            {
+                <a asp-controller="Patient" asp-action="Index" class="btn btn-secondary mt-4">Back To Dashboard</a>
+            }
+            else if (User.IsInRole("Doctor"))
+            {
+                <a asp-controller="Doctor" asp-action="Index" class="btn btn-secondary mt-4">Back To Dashboard</a>
+            }
+        </div>
+    </div>
 </div>

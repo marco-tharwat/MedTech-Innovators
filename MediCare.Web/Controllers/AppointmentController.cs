@@ -48,7 +48,9 @@ namespace MediCare.Web.Controllers
             //    .Select(u => u.DoctorProfile)
             //    .FirstOrDefaultAsync(d => d != null && d.Id == doctorId);
 
-            var doctor =await _unitOfWork.Repository<Doctor>().Query().Include(_ => _.User).Include(_=>_.Specialization).FirstOrDefaultAsync(_ => _.Id == doctorId);
+            var doctor =await _unitOfWork.Repository<Doctor>().Query()
+                .Include(_ => _.User).Include(_=>_.Specialization)
+                .FirstOrDefaultAsync(_ => _.Id == doctorId);
 
             var slots = await _workingHoursService.GetAvailableSlotsAsync(doctorId, selectedDate);
 
@@ -64,7 +66,7 @@ namespace MediCare.Web.Controllers
             return View(vm);
         }
 
-        [Authorize(Roles = "Patient")]
+        //[Authorize(Roles = "Patient")]
         [HttpPost]
         public async Task<IActionResult> Book(BookAppointmentViewModel vm)
         {
@@ -76,8 +78,9 @@ namespace MediCare.Web.Controllers
                 return View(vm);
             }
 
-            var user = await _userManager.GetUserAsync(User);
-            var patient = user?.PatientProfile;
+            //var user =await _userManager.GetUserAsync(User);
+            var userId = _userManager.GetUserId(User);
+            var patient = await _unitOfWork.Repository<Patient>().Query().FirstOrDefaultAsync(_=>_.UserId==userId);
             if (patient is null) return Forbid();
 
             var result = await _appointmentService
@@ -125,8 +128,8 @@ namespace MediCare.Web.Controllers
             {
                 AppointmentId = id,
                 DoctorId = appointment.DoctorId,
-                DoctorName = appointment.Doctor.User.FullName,
-                SpecializationName = appointment.Doctor.Specialization.Name,
+                DoctorName = appointment.Doctor?.User?.FullName?? "",
+                SpecializationName = appointment?.Doctor?.Specialization?.Name?? "",
                 SelectedDate = selectedDate,
                 AvailableSlots = slots.ToList()
             };
